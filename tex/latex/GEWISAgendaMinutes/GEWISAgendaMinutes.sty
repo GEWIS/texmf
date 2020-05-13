@@ -2,7 +2,7 @@
 %% Stijl - Gijs de Man, Rink Pieters
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{GEWISAgendaMinutes}[2020/02/25 GEWIS Agenda & Minutes Class]
+\ProvidesPackage{GEWISAgendaMinutes}[2020/04/25 GEWIS Agenda & Minutes Class]
 
 %% -----------------------------------------------------------------------------------------
 %% 01110000 01100001 01100011 01101011 01100001 01100111 01100101
@@ -85,7 +85,7 @@
 
 \newcommand\@languageAgendaFor{Agenda for the\xspace}
 \newcommand\@languageMeeting{meeting\xspace}
-\newcommand\@languageGM{General Meeting\xspace}
+\newcommand\@languageGM{General Members Meeting\xspace}
 \newcommand\@languageOf{of\xspace}
 \newcommand\@languageLocation{Location:\xspace}
 \newcommand\@languageVersion{version\xspace}
@@ -248,7 +248,7 @@
 		\equal{#2}{nil} \AND \equal{#3}{nil} \AND \equal{#4}{nil}%
 	}{%
 		\IfInteger{#1}{
-			\@meetingNumberNoStar%
+			\@meetingNumberDefault{#1}
 			\newcounter{lastnm}
 			\setcounter{lastnm}{\numexpr #1 - 1\relax}
 			\@getLastMeetingNumber{\thelastnm}
@@ -268,35 +268,6 @@
 		}%
 	}
 }
-
-
-%\def\meetingNumber{\@ifstar{\@meetingNumberStar}{\@meetingNumberNoStar}}
-%
-%\newcommand{\@meetingNumberStar}[1]{
-%	\renewcommand\@@meetingNumber{#1}
-%	\renewcommand\@@meetingNumbersc{#1}
-%}
-
-%\newcommand{\@meetingNumberNoStar}[1]{
-%	\IfInteger{#1}{
-%		\@meetingNumberDefault{#1}
-%		\newcounter{lastnm}
-%		\setcounter{lastnm}{\numexpr #1 - 1\relax}
-%		\@getLastMeetingNumber{\thelastnm}
-%	}{
-%		\PackageError{GEWISAgendaMinutes}{Meetingnumber not numeric. Use star command.}{Use a * command to use a non-numeric value and fill the last meeting number in by your own.}
-%	}
-%}
-
-%%
-%% Setting for last meetingnumber
-%%
-%\newcommand\lastMeetingNumber[1]{
-%	\ifdefempty{\@@lastMeetingNumber}{
-%		\renewcommand\@@lastMeetingNumber{#1}
-%		\renewcommand\@@lastMeetingNumbersc{#1}
-%	}{}
-%}
 
 %%
 %% Standard variables

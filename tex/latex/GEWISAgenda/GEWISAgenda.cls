@@ -7,10 +7,10 @@
 
 \usepackage[]{GEWISAgendaMinutes}
 
-\@ifpackagelater{GEWISAgendaMinutes}{2020/02/26}{
+\@ifpackagelater{GEWISAgendaMinutes}{2020/04/26}{
     \ClassError{GEWISAgenda}{Version mismatch: this version of the minutes class requires exactly GEWISAgendaMinutes package v0.1. A newer version was found}%
 }{
-    \@ifpackagelater{GEWISAgendaMinutes}{2020/02/25}{}{
+    \@ifpackagelater{GEWISAgendaMinutes}{2020/04/25}{}{
         \ClassError{GEWISAgenda}{Version mismatch: this version of the minutes class requires exactly GEWISAgendaMinutes package v0.1. An older version was found}%
     }
 }
@@ -63,11 +63,11 @@
 	\lhead{
 		\begin{minipage}[c]{.65\linewidth}
 			\begin{flushright}
-				{\fontsize{18}{22}\selectfont \@languageAgendaFor \ifdefempty{\@@meetingNumber}{}{\@@meetingNumbersc} \@languageMeeting\vspace{1mm} \\
-				\ifdefempty{\@@organName}{}{\@languageOf \@@organName \\}}
+				{\fontsize{18}{22}\selectfont \@languageAgendaFor \ifdefempty{\@@meetingNumber}{}{\@@meetingNumbersc}\\ \@languageMeeting
+					\ifdefempty{\@@organName}{}{\@languageOf \@@organName \\}}
 				\vspace{3mm}
 				\ifdefempty{\@@meetingDate}{}{\@@meetingDate
-					\ifdefempty{\@@meetingTime}{\\}{, \@@meetingTime \\}
+					\ifdefempty{\@@meetingTime}{}{, \@@meetingTime \\}
 				}
 				\ifdefempty{\@@meetingLocation}{}{\@languageLocation \@@meetingLocation \\}
 			\end{flushright}
@@ -96,7 +96,7 @@
 }
 
 %%
-%% Pagestyle for first page of general meeting agenda
+%% Pagestyle for first page of  meeting agenda
 %%
 \fancypagestyle{AgendaFirstpageGM}{
 	\fancyhf{}
