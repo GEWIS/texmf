@@ -1,21 +1,19 @@
-%% GEWIS Minutes and Agenda Tex style
+%% GEWIS Agenda Tex style v0.4
 %% Stijl - Gijs de Man, Rink Pieters
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{GEWISAgenda}[2020/02/25 GEWIS Agenda Class]
+\ProvidesClass{GEWISAgenda}[2020/05/13 GEWIS Agenda Class]
 \LoadClass[a4paper, 11pt]{article}
 
-\usepackage[]{GEWISAgendaMinutes}
+\RequirePackageWithOptions{GEWISAgendaMinutes}[2020/05/13]
 
-\@ifpackagelater{GEWISAgendaMinutes}{2020/04/26}{
-    \ClassError{GEWISAgenda}{Version mismatch: this version of the minutes class requires exactly GEWISAgendaMinutes package v0.1. A newer version was found}%
+\@ifpackagelater{GEWISAgendaMinutes}{2020/05/14}{%
+    \ClassError{GEWISAgenda}{Version mismatch: this version of the minutes class requires exactly GEWISAgendaMinutes package v0.4. A newer version was found}{}%
 }{
-    \@ifpackagelater{GEWISAgendaMinutes}{2020/04/25}{}{
-        \ClassError{GEWISAgenda}{Version mismatch: this version of the minutes class requires exactly GEWISAgendaMinutes package v0.1. An older version was found}%
+    \@ifpackagelater{GEWISAgendaMinutes}{2020/05/13}{}{%
+        \ClassError{GEWISAgenda}{Version mismatch: this version of the minutes class requires exactly GEWISAgendaMinutes package v0.4. An older version was found}{}%
     }
 }
-
-\ProcessOptions\relax
 
 
 %%  ----------------------------------------------------------------------------------------
@@ -52,7 +50,8 @@
 \settowidth{\nameWidth}{\@languageName}
 \settowidth{\deadWidth}{\@languageDeadline}
 
-\DTLnewdb{comments} \hyphenpenalty=10000
+\DTLnewdb{comments}
+\hyphenpenalty=10000
 
 %%
 %% Pagestyle for first page of agenda
@@ -64,12 +63,12 @@
 		\begin{minipage}[c]{.65\linewidth}
 			\begin{flushright}
 				{\fontsize{18}{22}\selectfont \@languageAgendaFor \ifdefempty{\@@meetingNumber}{}{\@@meetingNumbersc}\\ \@languageMeeting
-					\ifdefempty{\@@organName}{}{\@languageOf \@@organName \\}}
+					\ifdefempty{\@@organName}{\\}{\@languageOf \@@organName \\}}
 				\vspace{3mm}
 				\ifdefempty{\@@meetingDate}{}{\@@meetingDate
 					\ifdefempty{\@@meetingTime}{}{, \@@meetingTime \\}
 				}
-				\ifdefempty{\@@meetingLocation}{}{\@languageLocation \@@meetingLocation \\}
+				\ifdefempty{\@@meetingLocation}{}{\@@meetingLocation \\}
 			\end{flushright}
 		\end{minipage}
 	}
@@ -105,12 +104,12 @@
 		\begin{minipage}[c]{.65\linewidth}
 			\begin{flushright}
 				{\fontsize{18}{22}\selectfont \@languageAgendaFor \ifdefempty{\@@meetingNumber}{}{\@@meetingNumbersc}\\ \@languageGM
-					\ifdefempty{\@@organName}{}{\@languageOf \@@organName \\}}
+					\ifdefempty{\@@organName}{\\}{\@languageOf \@@organName \\}}
 				\vspace{3mm}
 					\ifdefempty{\@@meetingDate}{}{\@@meetingDate
 						\ifdefempty{\@@meetingTime}{}{, \@@meetingTime}
 					} \hspace{1cm}
-					\ifdefempty{\@@meetingLocation}{}{\@languageLocation \@@meetingLocation \\}
+					\ifdefempty{\@@meetingLocation}{}{\@@meetingLocation \\}
 			\end{flushright}
 		\end{minipage}
 	}
@@ -164,26 +163,51 @@
 		}
 	}
 }{
-	\newgeometry{
-		tmargin=47.5mm,
-		hmargin={33mm, 27mm},
-		headheight = 52.5mm,
-		headsep = 9.8mm,
-		height = 227.5mm,
-		footskip = 9.5mm, %22mm,
-		nomarginpar,
-	}
-	\thispagestyle{AgendaFirstpage}
-	\afterpage{
-		\globaldefs=1
+	\iftoggle{chairman}{
 		\newgeometry{
-			tmargin=15.5mm,
+			tmargin=47.5mm,
 			hmargin={33mm, 27mm},
 			headheight = 52.5mm,
 			headsep = 9.8mm,
-			height = 259.5mm,
+			height = 227.5mm,
 			footskip = 9.5mm, %22mm,
 			nomarginpar,
+		}
+		\thispagestyle{AgendaFirstpageGM}
+		\afterpage{
+			\globaldefs=1
+			\newgeometry{
+				tmargin=15.5mm,
+				hmargin={33mm, 27mm},
+				headheight = 52.5mm,
+				headsep = 9.8mm,
+				height = 259.5mm,
+				footskip = 9.5mm, %22mm,
+				nomarginpar,
+			}
+		}
+	}{
+		\newgeometry{
+			tmargin=47.5mm,
+			hmargin={33mm, 27mm},
+			headheight = 52.5mm,
+			headsep = 9.8mm,
+			height = 227.5mm,
+			footskip = 9.5mm, %22mm,
+			nomarginpar,
+		}
+		\thispagestyle{AgendaFirstpage}
+		\afterpage{
+			\globaldefs=1
+			\newgeometry{
+				tmargin=15.5mm,
+				hmargin={33mm, 27mm},
+				headheight = 52.5mm,
+				headsep = 9.8mm,
+				height = 259.5mm,
+				footskip = 9.5mm, %22mm,
+				nomarginpar,
+			}
 		}
 	}
 }
@@ -194,10 +218,11 @@
 %% Generating a new agendapoint
 %%
 \newcommand\agendaPoint[2][\thecurrentPoint]{%
-	\renewcommand\customNumber{}
-    \renewcommand\customSubNumber{}
-    \renewcommand\customSubSubNumber{}
-	\setcounter{currentSubPoint}{1}
+	\renewcommand\customNumber{}%
+    \renewcommand\customSubNumber{}%
+    \renewcommand\customSubSubNumber{}%
+	\setcounter{currentSubPoint}{1}%
+	\setcounter{currentSubSubPoint}{1}%
 	\setlength\extrarowheight{6pt}%
 	\begin{tabular}{R{8mm} p{12cm}}%
 		\large #1. & \large #2 \\%
@@ -207,12 +232,173 @@
 }
 
 %%
+%% Generating opening
+%%
+\newcommand\opening[1][\thecurrentPoint]{%
+	\renewcommand\customNumber{}%
+	\renewcommand\customSubNumber{}%
+	\renewcommand\customSubSubNumber{}%
+	\setcounter{currentSubPoint}{1}%
+	\setcounter{currentSubSubPoint}{1}%
+	\setlength\extrarowheight{6pt}%
+	\begin{tabular}{R{8mm} p{12cm}}%
+		\large #1. & \large Opening \\%
+	\end{tabular}%
+	\ifthenelse{\equal{\string #1}{\string \thecurrentPoint}}%
+	{\stepcounter{currentPoint}}{\renewcommand\customNumber{#1}} \\%
+}
+
+%%
+%% Generating determining final agenda
+%%
+\newcommand\VDA[1][\thecurrentPoint]{\DFA[#1]}%
+\newcommand\DFA[1][\thecurrentPoint]{%
+	\renewcommand\customNumber{}%
+	\renewcommand\customSubNumber{}%
+	\renewcommand\customSubSubNumber{}%
+	\setcounter{currentSubPoint}{1}%
+	\setcounter{currentSubSubPoint}{1}%
+	\setlength\extrarowheight{6pt}%
+	\begin{tabular}{R{8mm} p{12cm}}%
+		\large #1. & \large \@languageDFA \\%
+	\end{tabular}%
+	\ifthenelse{\equal{\string #1}{\string \thecurrentPoint}}%
+	{\stepcounter{currentPoint}}{\renewcommand\customNumber{#1}} \\%
+}
+
+%%
+%% Generating announcements
+%%
+\newcommand\mededelingen[1][\thecurrentPoint]{\announcements[#1]}%
+\newcommand\announcements[1][\thecurrentPoint]{%
+	\renewcommand\customNumber{}%
+	\renewcommand\customSubNumber{}%
+	\renewcommand\customSubSubNumber{}%
+	\setcounter{currentSubPoint}{1}%
+	\setcounter{currentSubSubPoint}{1}%
+	\setlength\extrarowheight{6pt}%
+	\begin{tabular}{R{8mm} p{12cm}}%
+		\large #1. & \large \@languageAnnouncements \\%
+	\end{tabular}%
+	\ifthenelse{\equal{\string #1}{\string \thecurrentPoint}}%
+	{\stepcounter{currentPoint}}{\renewcommand\customNumber{#1}} \\%
+}
+
+%%
+%% Generating last minutes
+%%
+\newcommand\notulen[1][\thecurrentPoint]{\minutes[#1]}%
+\newcommand\minutes[1][\thecurrentPoint]{%
+	\renewcommand\customNumber{}%
+	\renewcommand\customSubNumber{}%
+	\renewcommand\customSubSubNumber{}%
+	\setcounter{currentSubPoint}{1}%
+	\setcounter{currentSubSubPoint}{1}%
+	\setlength\extrarowheight{6pt}%
+	\begin{tabular}{R{8mm} p{12cm}}%
+		\large #1. & \large \@languageLastMinutes \\%
+	\end{tabular}%
+	\ifthenelse{\equal{\string #1}{\string \thecurrentPoint}}%
+	{\stepcounter{currentPoint}}{\renewcommand\customNumber{#1}} \\%
+}
+
+\newcommand\notulenALV[1][\thecurrentPoint]{\minutesGM[#1]}%
+\newcommand\minutesGM[1][\thecurrentPoint]{%
+	\renewcommand\customNumber{}%
+	\renewcommand\customSubNumber{}%
+	\renewcommand\customSubSubNumber{}%
+	\setcounter{currentSubPoint}{1}%
+	\setcounter{currentSubSubPoint}{1}%
+	\setlength\extrarowheight{6pt}%
+	\begin{tabular}{R{8mm} p{12cm}}%
+		\large #1. & \large \@languageLastMinutesGeneral \\%
+	\end{tabular}%
+	\ifthenelse{\equal{\string #1}{\string \thecurrentPoint}}%
+	{\stepcounter{currentPoint}}{\renewcommand\customNumber{#1}} \\%
+}
+
+\newcommand\notulenVV[1][\thecurrentPoint]{\minutesGM[#1]}%
+\newcommand\notulenCM[1][\thecurrentPoint]{\minutesGM[#1]}%
+
+%%
+%% Generating action points
+%%
+\newcommand\actiePunten[1][\thecurrentPoint]{\actionPoints[#1]}%
+\newcommand\actionPoints[1][\thecurrentPoint]{%
+	\renewcommand\customNumber{}%
+	\renewcommand\customSubNumber{}%
+	\renewcommand\customSubSubNumber{}%
+	\setcounter{currentSubPoint}{1}%
+	\setcounter{currentSubSubPoint}{1}%
+	\setlength\extrarowheight{6pt}%
+	\begin{tabular}{R{8mm} p{12cm}}%
+		\large #1. & \large \@languageActionPoints \\%
+	\end{tabular}%
+	\ifthenelse{\equal{\string #1}{\string \thecurrentPoint}}%
+	{\stepcounter{currentPoint}}{\renewcommand\customNumber{#1}} \\%
+}
+
+%%
+%% Generating any other businesses
+%%
+\newcommand\WVTTK[1][\thecurrentPoint]{\AOB[#1]}%
+\newcommand\AOB[1][\thecurrentPoint]{%
+	\renewcommand\customNumber{}%
+	\renewcommand\customSubNumber{}%
+	\renewcommand\customSubSubNumber{}%
+	\setcounter{currentSubPoint}{1}%
+	\setcounter{currentSubSubPoint}{1}%
+	\setlength\extrarowheight{6pt}%
+	\begin{tabular}{R{8mm} p{12cm}}%
+		\large #1. & \large \@languageOAB \\%
+	\end{tabular}%
+	\ifthenelse{\equal{\string #1}{\string \thecurrentPoint}}%
+	{\stepcounter{currentPoint}}{\renewcommand\customNumber{#1}} \\%
+}
+
+%%
+%% Generating inquiry
+%%
+\newcommand\rondvraag[1][\thecurrentPoint]{\finalInquiry[#1]}%
+\newcommand\finalInquiry[1][\thecurrentPoint]{%
+	\renewcommand\customNumber{}%
+	\renewcommand\customSubNumber{}%
+	\renewcommand\customSubSubNumber{}%
+	\setcounter{currentSubPoint}{1}%
+	\setcounter{currentSubSubPoint}{1}%
+	\setlength\extrarowheight{6pt}%
+	\begin{tabular}{R{8mm} p{12cm}}%
+		\large #1. & \large \@languageInquiry \\%
+	\end{tabular}%
+	\ifthenelse{\equal{\string #1}{\string \thecurrentPoint}}%
+	{\stepcounter{currentPoint}}{\renewcommand\customNumber{#1}} \\%
+}
+
+%%
+%% Generating closure
+%%
+\newcommand\sluiting[1][\thecurrentPoint]{\closure[#1]}%
+\newcommand\closure[1][\thecurrentPoint]{%
+	\renewcommand\customNumber{}%
+	\renewcommand\customSubNumber{}%
+	\renewcommand\customSubSubNumber{}%
+	\setcounter{currentSubPoint}{1}%
+	\setcounter{currentSubSubPoint}{1}%
+	\setlength\extrarowheight{6pt}%
+	\begin{tabular}{R{8mm} p{12cm}}%
+		\large #1. & \large \@languageClosure \\%
+	\end{tabular}%
+	\ifthenelse{\equal{\string #1}{\string \thecurrentPoint}}%
+	{\stepcounter{currentPoint}}{\renewcommand\customNumber{#1}} \\%
+}
+
+%%
 %% Generating a new subpoint
 %%
 \newcommand\subPoint[2][\thecurrentSubPoint]{%
-	\renewcommand\customSubNumber{}
-    \renewcommand\customSubSubNumber{}
-	\setcounter{currentSubSubPoint}{1}
+	\renewcommand\customSubNumber{}%
+    \renewcommand\customSubSubNumber{}%
+	\setcounter{currentSubSubPoint}{1}%
 	\setlength\extrarowheight{6pt}%
 	\begin{tabular}{R{14mm} p{12cm}}%
 		\large #1. & \large#2 \\%
@@ -225,7 +411,7 @@
 %% Generating a new subsubpoint
 %%
 \newcommand\subSubPoint[2][\thecurrentSubSubPoint]{%
-	\renewcommand\customSubSubNumber{}
+	\renewcommand\customSubSubNumber{}%
 	\setlength\extrarowheight{6pt}%
 	\begin{tabular}{R{20mm} p{12cm}}%
 		\large#1. & \large#2 \\%
@@ -343,45 +529,3 @@
 
     %You would think these whitespaces above are useless, but be surprised. By deleting them, and having text overlap from the first page to the second page, the geometry will actually not update. To make a long story short, if you don't want you geometry to be fucked up, let these whitespaces be.
 }
-
-%% -----------------------------------------------------------------------------------------------------
-%% 01100111 01100101 01101110 01100101 01110010 01100001 01110100 01100101
-%% 01101101 01101001 01101110 01110101 01110100 01100101 01110011
-%% -----------------------------------------------------------------------------------------------------
-
-%\newcommand\generateminutes{
-%	\newwrite\minutes
-%	\immediate\openout\minutes=minutes.tex
-%	\immediate\write\minutes{\@percentchar\@percentchar GEWIS Minutes Template}
-%	\immediate\write\minutes{\@percentchar\@percentchar Stijl - Gijs de Man, Rink Pieters}
-%	\immediate\write\minutes{}
-%	\immediate\write\minutes{\@backslashchar documentclass[a4paper, 11pt]{article}}
-%	\immediate\write\minutes{\@backslashchar usepackage[]{GEWIS_notulen}}
-%	\immediate\write\minutes{}
-%	\immediate\write\minutes{\@percentchar Settings minutes}
-%	\immediate\write\minutes{\@backslashchar committeename{\@@organName}}
-%	\immediate\write\minutes{\@backslashchar meetingnumber{\@@meetingNumber}}
-%%	\immediate\write\minutes{\@backslashchar meetingdate{\@@meetingDate}}
-%	\immediate\write\minutes{\@backslashchar minutesversion{0.0}}
-%	\immediate\write\minutes{\@backslashchar minutesdate{1 januari 2020}}
-%	\immediate\write\minutes{}
-%	\immediate\write\minutes{\@percentchar Settings presence}
-%	\immediate\write\minutes{\@backslashchar present{\@@present}}
-%	\immediate\write\minutes{\@backslashchar absentnotice{\@@absentnotice}}
-%	\immediate\write\minutes{\@backslashchar absent{\@@absent}}
-%	\immediate\write\minutes{\@backslashchar guests{\@@guests}}
-%	\immediate\write\minutes{}
-%	\immediate\write\minutes{\@percentchar Settings functions}
-%	\immediate\write\minutes{\@backslashchar chairman{\@@chairman}}
-%	\immediate\write\minutes{\@backslashchar minuteTaker{\@@minuteTaker}}
-%	\immediate\write\minutes{}
-%	\immediate\write\minutes{\@backslashchar begin{document}}
-%	\immediate\write\minutes{\@percentchar First page for the minutes}
-%	\immediate\write\minutes{\@backslashchar MinutesFirstpage}
-%	\immediate\write\minutes{}
-%	\immediate\write\minutes{\@percentchar Generate list of people present}
-%	\immediate\write\minutes{\@backslashchar presenceList}
-%	\immediate\write\minutes{}
-%	\immediate\write\minutes{\@backslashchar end{document}}
-%	\closeout\minutes
-%}

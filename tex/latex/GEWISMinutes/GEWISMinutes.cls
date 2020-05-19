@@ -1,21 +1,19 @@
-%% GEWIS Minute style
+%% GEWIS Minute Tex style v0.4
 %% Stijl - Gijs de Man, Rink Pieters
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{GEWISMinutes}[2020/03/16 GEWIS Minute Class]
+\ProvidesClass{GEWISMinutes}[2020/05/13 GEWIS Minute Class]
 \LoadClass[a4paper, 11pt]{article}
 
-\usepackage[]{GEWISAgendaMinutes}
+\RequirePackageWithOptions{GEWISAgendaMinutes}[2020/05/13]
 
-\@ifpackagelater{GEWISAgendaMinutes}{2020/02/26}{
-    \ClassError{GEWISMinutes}{Version mismatch: this version of the minutes class requires exactly GEWISAgendaMinutes package v0.1. A newer version was found}%
+\@ifpackagelater{GEWISAgendaMinutes}{2020/05/14}{%
+    \ClassError{GEWISAgenda}{Version mismatch: this version of the minutes class requires exactly GEWISAgendaMinutes package v0.4. A newer version was found}{}%
 }{
-    \@ifpackagelater{GEWISAgendaMinutes}{2020/02/25}{}{
-        \ClassError{GEWISMinutes}{Version mismatch: this version of the minutes class requires exactly GEWISAgendaMinutes package v0.1. An older version was found}%
+    \@ifpackagelater{GEWISAgendaMinutes}{2020/05/13}{}{%
+        \ClassError{GEWISAgenda}{Version mismatch: this version of the minutes class requires exactly GEWISAgendaMinutes package v0.4. An older version was found}{}%
     }
 }
-
-\ProcessOptions\relax
 
 
 %%
