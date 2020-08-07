@@ -9,7 +9,7 @@
 %% This is a generated file.
 %% 
 %% Project: zref
-%% Version: 2020-03-03 v2.29
+%% Version: 2020-05-28 v2.31
 %% 
 %% Copyright (C)
 %%   2006-2012 Heiko Oberdiek
@@ -48,22 +48,29 @@
 %% 
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{zref-counter}%
-  [2020-03-03 v2.29 Module counter for zref (HO)]%
+  [2020-05-28 v2.31 Module counter for zref (HO)]%
 \RequirePackage{zref-base}[2019/11/29]
 \ifx\ZREF@base@ok Y%
 \else
   \expandafter\endinput
 \fi
-\zref@newprop{counter}{}
-\zref@addprop\ZREF@mainlist{counter}
-\AtBeginDocument{%
-  \ZREF@patch{refstepcounter}{%
-    \def\refstepcounter#1{%
-      \zref@setcurrent{counter}{#1}%
-      \ZREF@org@refstepcounter{#1}%
+\@ifl@t@r\fmtversion{2020-10-01}
+ {
+  \zref@newprop{counter}{\@currentcounter}
+  \zref@addprop\ZREF@mainlist{counter}
+ }
+ {
+  \zref@newprop{counter}{}
+  \zref@addprop\ZREF@mainlist{counter}
+  \AtBeginDocument{%
+    \ZREF@patch{refstepcounter}{%
+      \def\refstepcounter#1{%
+        \zref@setcurrent{counter}{#1}%
+        \ZREF@org@refstepcounter{#1}%
+      }%
     }%
-  }%
-}
+  }
+ }
 %% \section{Installation}
 \endinput
 %%

@@ -7,7 +7,7 @@
 %% fontaxes.dtx  (with options: `package')
 %% 
 %% Copyright (c) 2007 by Andreas Buehmann
-%% Copyright (c) 2014 by Michael Ummels <michael.ummels@rwth-aachen.de>
+%% Copyright (c) 2020 by Michael Ummels <michael.ummels@rwth-aachen.de>
 %% 
 %% This work may be distributed and/or modified under the
 %% conditions of the LaTeX Project Public License, either version 1.3c
@@ -25,7 +25,7 @@
 %% the derived files fontaxes.sty, test-fontaxes.tex and fontaxes.pdf.
 %% 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{fontaxes}[2014/03/23 v1.0d Font selection axes]
+\ProvidesPackage{fontaxes}[2020/07/21 v1.0e Font selection axes]
 \DeclareRobustCommand\upshape{\not@math@alphabet\upshape\relax
   \fontprimaryshape\updefault\selectfont}
 \DeclareRobustCommand\itshape{\not@math@alphabet\itshape\mathit
@@ -206,11 +206,15 @@
   \edef\fontaxes@code{\fontaxes@family@base-\fontaxes@code}%
   \fontaxes@check@family\fontaxes@code
   \iffontaxes@exists\else
-    \fontaxes@encode@figuresalt
-    \edef\fontaxes@code{\fontaxes@family@base\fontaxes@code}%
+    \edef\fontaxes@code{\fontaxes@family@base-LF}%
     \fontaxes@check@family\fontaxes@code
     \iffontaxes@exists\else
-      \edef\fontaxes@code{\fontaxes@family@base}%
+      \fontaxes@encode@figuresalt
+      \edef\fontaxes@code{\fontaxes@family@base\fontaxes@code}%
+      \fontaxes@check@family\fontaxes@code
+      \iffontaxes@exists\else
+        \edef\fontaxes@code{\fontaxes@family@base}%
+      \fi
     \fi
   \fi
 }
