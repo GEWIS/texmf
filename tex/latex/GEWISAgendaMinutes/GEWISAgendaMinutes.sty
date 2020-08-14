@@ -1,0 +1,564 @@
+%% GEWIS Minutes and Agenda Tex style v0.4
+%% Stijl - Gijs de Man, Rink Pieters
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{GEWISAgendaMinutes}[2020/05/13 GEWIS Agenda and Minutes Package]
+
+%% -----------------------------------------------------------------------------------------
+%% 01110000 01100001 01100011 01101011 01100001 01100111 01100101
+%% 01101001 01101101 01110000 01101111 01110010 01110100 01110011
+%% -----------------------------------------------------------------------------------------
+
+\usepackage{forarray}
+\usepackage{fancyhdr} % Correctly style header and footer of the GEWIS stationery
+\usepackage{ifthen} % Allow if-statements
+\usepackage{etoolbox} % Helper package for digital display of stationery
+\usepackage{lastpage}
+\usepackage{booktabs} % Better styling of tables, don't use vertical bars anymore
+\usepackage{fontawesome} % Glyphs of association details in header
+\usepackage{anyfontsize}
+\usepackage{multirow} % Tabular alignment over multiple rows
+\usepackage{changepage} % Allows to locally resize the margins
+\usepackage{titlesec} % Adjust the formatting of sections, subsections etc.
+\usepackage[gen]{eurosym} % Guess
+\usepackage{xspace} % Automatically add whitespace after commands if necessary, no more need for "\Bla\ "
+\usepackage[hidelinks, urlcolor=blue]{hyperref} % Interactive links for contact details
+\usepackage{graphicx} %To insert pdf background
+\usepackage{ocg-p} %Possibility to use layers - used for background hiding on print
+
+%packages needed for page numbering
+\usepackage{atenddvi}
+\usepackage[user]{zref}
+
+% Deprecated packages
+\usepackage{tabularx} % Used for old-style alignment of letter details
+\usepackage{array} % Additional tabular column options
+
+\usepackage{datatool} % Used for storing names, times, comments etc in databases to retreive later
+
+\usepackage{xstring} % For calculations with strings and getting substrings
+\usepackage{calc} % For getting length of strings
+\usepackage{listofitems} % Package for processing list of items
+\usepackage{afterpage} % For making new geometry
+\usepackage{xargs}
+
+% Standard documentpackages
+\usepackage[a4paper,
+	tmargin=15.5mm,
+	hmargin={33mm, 27mm},
+	headheight = 52.5mm,
+	headsep = 9.8mm,
+	height = 259.5mm,
+	footskip = 9.5mm, %22mm,
+	nomarginpar,
+	%showframe, % Debugging purposes only
+]{geometry}
+
+% Font settings
+\usepackage[T1]{fontenc} % Core package for T1 font encoding. Required for using lato font
+\usepackage[default]{lato} % Loading the actual T1 font
+\pdfmapfile{=lato.map}
+\pdfmapfile{=fontawesome.map}
+
+% Create print friendly option
+\newtoggle{printletterhead}
+\togglefalse{printletterhead}
+\DeclareOption{printletterhead}{\toggletrue{printletterhead}}
+
+% Create toggle for general meeting
+\newtoggle{general}
+\togglefalse{general}
+\DeclareOption{general}{\toggletrue{general}}
+
+% Create toggle for chairman meeting
+\newtoggle{chairman}
+\togglefalse{chairman}
+\DeclareOption{chairman}{
+	\toggletrue{chairman}
+	\renewcommand\@languageGM{Chairmen's Meeting\xspace}
+}
+
+
+% Create dutch option
+\newcommand\@languagePage{Page\xspace}
+\newcommand\@languagePresent{Present\xspace}
+\newcommand\@languageAbsentNotice{Absent with notice\xspace}
+\newcommand\@languageAbsent{Absent\xspace}
+\newcommand\@languageGuest{Guests\xspace}
+\newcommand\@languageMinutetaker{minute taker\xspace}
+\newcommand\@languageChairman{chairman\xspace}
+
+\newcommand\@languageAgendaFor{Agenda for the\xspace}
+\newcommand\@languageMeeting{meeting\xspace}
+\newcommand\@languageGM{General Members Meeting\xspace}
+\newcommand\@languageOf{of\xspace}
+\newcommand\@languageVersion{version\xspace}
+
+\newcommand\@languageNumber{No.\xspace}
+\newcommand\@languageName{Name\xspace}
+\newcommand\@languageAction{Action\xspace}
+\newcommand\@languageDeadline{Deadline\xspace}
+
+\newcommand\@languageJanuary{January}
+\newcommand\@languageFebruary{February}
+\newcommand\@languageMarch{March}
+\newcommand\@languageApril{April}
+\newcommand\@languageMay{May}
+\newcommand\@languageJune{June}
+\newcommand\@languageJuly{July}
+\newcommand\@languageAugust{August}
+\newcommand\@languageSeptember{September}
+\newcommand\@languageOctober{October}
+\newcommand\@languageNovember{November}
+\newcommand\@languageDecember{December}
+
+\newcommand\@languageDFA{Determining Final Agenda}
+\newcommand\@languageAnnouncements{Announcements}
+\newcommand\@languageLastMinutes{Minutes \lastMeetNumber* Meeting}
+\newcommand\@languageLastMinutesGeneral{Minutes \lastMeetNumber* \@languageGM}
+\newcommand\@languageActionPoints{Action points}
+\newcommand\@languageOAB{A.O.B.}
+\newcommand\@languageInquiry{Final Inquiry}
+\newcommand\@languageClosure{Closure}
+
+% Create actual Dutch toggle
+\newtoggle{dutch}
+\togglefalse{dutch}
+\DeclareOption{dutch}{
+	\renewcommand\@languagePage{Pagina\xspace}
+	\renewcommand\@languagePresent{Aanwezig\xspace}
+	\renewcommand\@languageAbsentNotice{Afwezig met kennisgeving\xspace}
+	\renewcommand\@languageAbsent{Afwezig\xspace}
+	\renewcommand\@languageGuest{Toehoorders\xspace}
+	\renewcommand\@languageMinutetaker{not.\xspace}
+	\renewcommand\@languageChairman{voorz.\xspace}
+
+	\renewcommand\@languageAgendaFor{Agenda voor de\xspace}
+	\renewcommand\@languageMeeting{vergadering\xspace}
+	\iftoggle{chairman}{
+		\renewcommand\@languageGM{Voorzitters Vergadering\xspace}
+	}{
+		\renewcommand\@languageGM{Algemene Leden Vergadering\xspace}
+	}
+	\renewcommand\@languageOf{der\xspace}
+	\renewcommand\@languageVersion{versie\xspace}
+
+	\renewcommand\@languageNumber{Nr.\xspace}
+	\renewcommand\@languageName{Naam\xspace}
+	\renewcommand\@languageAction{Actie\xspace}
+	\renewcommand\@languageDeadline{Deadline\xspace}
+	
+	\renewcommand\@languageJanuary{januari}
+	\renewcommand\@languageFebruary{februari}
+	\renewcommand\@languageMarch{maart}
+	\renewcommand\@languageApril{april}
+	\renewcommand\@languageMay{mei}
+	\renewcommand\@languageJune{juni}
+	\renewcommand\@languageJuly{juli}
+	\renewcommand\@languageAugust{augustus}
+	\renewcommand\@languageSeptember{september}
+	\renewcommand\@languageOctober{oktober}
+	\renewcommand\@languageNovember{november}
+	\renewcommand\@languageDecember{december}
+	
+	\renewcommand\@languageDFA{Vaststellen Definitieve Agenda}
+	\renewcommand\@languageAnnouncements{Mededelingen}
+	\renewcommand\@languageLastMinutes{Notulen \lastMeetNumber* Vergadering}
+	\renewcommand\@languageLastMinutesGeneral{Notulen \lastMeetNumber* \@languageGM}
+	\renewcommand\@languageActionPoints{Actiepunten}
+	\renewcommand\@languageOAB{W.V.T.T.K.}
+	\renewcommand\@languageInquiry{Rondvraag}
+	\renewcommand\@languageClosure{Sluiting}
+	
+	\toggletrue{dutch}
+}
+
+\DeclareOption{english}{\PackageWarningNoLine{GEWISAgendaMinutes}{Warning: english toggle was used, but default language is english}}
+\ProcessOptions\relax
+
+% We don't do general meetings in Dutch
+\iftoggle{general}{
+	\iftoggle{dutch}{\PackageError{GEWISAgendaMinutes}{Parameter mismatch: Cannot use both the general and the dutch toggle}{}}%
+	\iftoggle{chairman}{\PackageError{GEWISAgendaMinutes}{Parameter mismatch: Cannot use both the general and the chairman toggle}{}}%
+}
+
+% Starting new page numbering when entering new section
+\newcounter{pagesec}
+\def\totalsec{0}
+
+% Get pagenumber of current section
+\newcommand{\@pageNumber}{%
+    \stepcounter{pagesec}%
+    \thepagesec\ / \ref{\totalsec}%
+}
+
+% Enter new section, restart page numbering
+\newcommand{\resetPageCount}{%
+    \clearpage
+    \edef\@currentlabel{\thepagesec}\label{\totalsec}%
+    \xdef\totalsec{\thepage}%
+    \setcounter{pagesec}{0}
+}
+
+% Make sure last pages get total section number
+\AtEndDvi{\edef\@currentlabel{\thepagesec}\label{\totalsec}}
+
+
+\newcommand*{\@AddBackground}[2][]{
+    \iftoggle{printletterhead}%
+        {%We include only the default letterhead and print it as well
+            \@AddFullPageLayer[#2]{letterhead_alt}{ifvisible}{always}{B}{1}
+        }
+        {%We create one non-visible, but printable layer layer
+            \@AddFullPageLayer[#1]{letterhead_alt}{always}{never}{P}{0}
+         %We create one visible layer with the full style (on top of the previous one, since some viewers show both)
+            \@AddFullPageLayer[#2]{letterhead_alt}{never}{always}{V}{1}
+        }
+}
+
+%Arguments: [page number]{file name}{printocg}{exportocg}{LayerName}{visible}
+\newcommand*{\@AddFullPageLayer}[6][] {
+    \AddToShipoutPicture*{
+        \put(-10.4mm\@gobble,-10.4mm\@gobble){%
+            \begin{ocg}[printocg=#3,exportocg=#4,listintoolbar=iffirstuse]{Layer_briefpapier_#5}{#5}{#6}
+                \parbox[b][\paperheight]{\paperwidth}{%
+                    \vfill
+                    \centering
+                    \includegraphics[page=#1, keepaspectratio]{stationery/#2}
+                    \vfill
+                }
+            \end{ocg}
+        }
+    }
+}
+
+%% Pagestyle for followup pages
+\fancypagestyle{GEWISfollowup}{
+	\fancyhf{}
+    \renewcommand{\headrulewidth}{0pt}
+    \rfoot{
+    	\begin{adjustwidth}{117mm}{}\hfill
+			\begin{minipage}[c]{32mm}\centering
+				\@languagePage \@pageNumber
+			\end{minipage}
+		\end{adjustwidth}
+        \@AddBackground[4]{2}
+	}
+	\lfoot{
+		\begin{adjustwidth}{2mm}{}
+			\begin{minipage}[l]{100mm}
+				\textit{%
+					\ifdefempty{\@@agendaDate}{%
+						\ifdefempty{\@@agendaVersion}{}{\@languageVersion\@@agendaVersion}%
+					}{%
+						\ifdefempty{\@@agendaVersion}{\@@agendaDate}{\@@agendaDate, \@languageVersion\@@agendaVersion}%
+				}}%
+			\end{minipage}\hfill
+		\end{adjustwidth}
+	}
+}
+
+%% Additional settings
+\setlength\parindent{0pt}\relax  % No indentation at new paragraph
+
+%% -----------------------------------------------------------------------------------------------------
+%% 01101111 01110110 01100101 01110010 01101100 01100001 01110000
+%% 01110011 01100101 01110100 01110100 01101001 01101110 01100111 01110011
+%% -----------------------------------------------------------------------------------------------------
+
+%%
+%% Variables for presence
+%%
+\newcommand\@@present{}
+\newcommand\@@absentnotice{}
+\newcommand\@@absent{}
+\newcommand\@@guests{}
+
+\def\names{}
+\newcommand\present{\@ifstar{\@invited}{\@notinvited}}
+\newcommand\@invited[1]{
+    \iftoggle{dutch}{\renewcommand\@languagePresent{Uitgenodigd\xspace}}{\renewcommand\@languagePresent{Invited\xspace}}
+    \settowidth{\presenceWidth}{\@languagePresent xx}
+	\renewcommand\@@present{#1}
+	\def\names{\@@present}
+    \AtBeginDocument{\@presenceList}
+}
+\newcommand\@notinvited[1]{
+    \iftoggle{dutch}{\renewcommand\@languagePresent{Aanwezig\xspace}}{\renewcommand\@languagePresent{Present\xspace}}
+    \settowidth{\presenceWidth}{\@languagePresent xx}
+	\renewcommand\@@present{#1}
+	\def\names{\@@present}
+    \AtBeginDocument{\@presenceList}
+}
+\newcommand\absentNotice[1]{
+	\settowidth{\presenceWidth}{\@languageAbsentNotice xx}
+	\renewcommand\@@absentnotice{#1}
+}
+\newcommand\absent[1]{\renewcommand\@@absent{#1}}
+\newcommand\guests[1]{\renewcommand\@@guests{#1}}
+
+%%
+%% Variables for meetnumber (with superscript)
+%%
+\newcommandx\meetingNumber[4][2=nil, 3=nil, 4=nil]{%
+	\ifthenelse{%
+		\equal{#2}{nil} \AND \equal{#3}{nil} \AND \equal{#4}{nil}%
+	}{%
+		\IfInteger{#1}{
+			\@meetingNumberDefault{#1}
+			\newcounter{lastnm}
+			\setcounter{lastnm}{\numexpr #1 - 1\relax}
+			\@getLastMeetingNumber{\thelastnm}
+		}{
+			\PackageError{GEWISAgendaMinutes}{Meetingnumber not numeric. Use star command.}{Use a * command to use a non-numeric value and fill the last meeting number in by your own.}
+		}
+	}{%
+		\ifthenelse{%
+			\equal{#2}{nil} \OR \equal{#3}{nil} \OR \equal{#4}{nil}%
+		}{%
+			\PackageError{GEWISAgendaMinutes}{Not all arguments given.}{To use custom agenda numbers, you must provide all arguments needed.}
+		}{%
+			\renewcommand\@@meetingNumber{#1}
+			\renewcommand\@@meetingNumbersc{#1\textsuperscript{#2}}
+			\renewcommand\@@lastMeetingNumber{#3}
+			\renewcommand\@@lastMeetingNumbersc{#3\textsuperscript{#4}}
+		}%
+	}
+}
+
+%%
+%% Standard variables
+%%
+\newcommand\@@organName{}
+\newcommand\@@meetingNumber{}
+\newcommand\@@lastMeetingNumber{}
+\newcommand\@@meetingNumbersc{}
+\newcommand\@@meetingNumbersconly{}
+\newcommand\@@lastMeetingNumbersc{}
+\newcommand\@@meetingDate{}
+\newcommand\@@meetingTime{}
+\newcommand\@@meetingLocation{}
+\newcommand\@@minutesVersion{}
+\newcommand\@@minutesDate{}
+\newcommand\@@agendaVersion{}
+\newcommand\@@agendaDate{}
+
+\newcommand\organName[1]{\renewcommand\@@organName{#1}}
+\newcommand\meetingTime[1]{\renewcommand\@@meetingTime{#1}}
+\newcommand\meetingLocation[1]{\renewcommand\@@meetingLocation{#1}}
+\newcommand\minutesVersion[1]{\renewcommand\@@minutesVersion{#1}}
+\newcommand\minutesDate[1]{\renewcommand\@@minutesDate{#1}}
+\newcommand\agendaVersion[1]{\renewcommand\@@agendaVersion{#1}}
+
+\newcommand\@@meetingMonth{}
+\newcommand\@@agendaMonth{}
+\newcommand\@@agendaDay{}
+
+\newcounter{mday}
+\newcounter{mmonth}
+\newcounter{myear}
+\newcounter{aday}
+\newcounter{amonth}
+\newcounter{ayear}
+
+\newcommand\meetingDate[3]{%
+	%extra such that tex commands for dates can be used
+	\setcounter{mday}{#1}
+	\setcounter{mmonth}{#2}
+	\setcounter{myear}{#3}
+	\ifthenelse{\equal{\themmonth}{1}}{\renewcommand\@@meetingMonth{\@languageJanuary}}{%
+	\ifthenelse{\equal{\themmonth}{2}}{\renewcommand\@@meetingMonth{\@languageFebruary}}{%
+		\ifthenelse{\equal{\themmonth}{3}}{\renewcommand\@@meetingMonth{\@languageMarch}}{%
+		\ifthenelse{\equal{\themmonth}{4}}{\renewcommand\@@meetingMonth{\@languageApril}}{%
+			\ifthenelse{\equal{\themmonth}{5}}{\renewcommand\@@meetingMonth{\@languageMay}}{%
+			\ifthenelse{\equal{\themmonth}{6}}{\renewcommand\@@meetingMonth{\@languageJune}}{%
+				\ifthenelse{\equal{\themmonth}{7}}{\renewcommand\@@meetingMonth{\@languageJuly}}{%
+				\ifthenelse{\equal{\themmonth}{8}}{\renewcommand\@@meetingMonth{\@languageAugust}}{%
+					\ifthenelse{\equal{\themmonth}{9}}{\renewcommand\@@meetingMonth{\@languageSeptember}}{%
+					\ifthenelse{\equal{\themmonth}{10}}{\renewcommand\@@meetingMonth{\@languageOctober}}{%
+						\ifthenelse{\equal{\themmonth}{11}}{\renewcommand\@@meetingMonth{\@languageNovember}}{%
+						\ifthenelse{\equal{\themmonth}{12}}{\renewcommand\@@meetingMonth{\@languageDecember}}{}%
+	}}}}}}}}}}}%
+	\iftoggle{dutch}{\renewcommand\@@meetingDate{\themday~\@@meetingMonth~\themyear}}{\renewcommand\@@meetingDate{\@@meetingMonth~\themday,~\themyear}}
+}
+
+\newcommand\agendaDate[3]{
+	%extra such that tex commands for dates can be used
+	\setcounter{aday}{#1}
+	\setcounter{amonth}{#2}
+	\setcounter{ayear}{#3}
+	\ifthenelse{\equal{\theamonth}{1}}{\renewcommand\@@agendaMonth{\@languageJanuary}}{%
+	\ifthenelse{\equal{\theamonth}{2}}{\renewcommand\@@agendaMonth{\@languageFebruary}}{%
+		\ifthenelse{\equal{\theamonth}{3}}{\renewcommand\@@agendaMonth{\@languageMarch}}{%
+		\ifthenelse{\equal{\theamonth}{4}}{\renewcommand\@@agendaMonth{\@languageApril}}{%
+			\ifthenelse{\equal{\theamonth}{5}}{\renewcommand\@@agendaMonth{\@languageMay}}{%
+			\ifthenelse{\equal{\theamonth}{6}}{\renewcommand\@@agendaMonth{\@languageJune}}{%
+				\ifthenelse{\equal{\theamonth}{7}}{\renewcommand\@@agendaMonth{\@languageJuly}}{%
+				\ifthenelse{\equal{\theamonth}{8}}{\renewcommand\@@agendaMonth{\@languageAugust}}{%
+					\ifthenelse{\equal{\theamonth}{9}}{\renewcommand\@@agendaMonth{\@languageSeptember}}{%
+					\ifthenelse{\equal{\theamonth}{10}}{\renewcommand\@@agendaMonth{\@languageOctober}}{%
+						\ifthenelse{\equal{\theamonth}{11}}{\renewcommand\@@agendaMonth{\@languageNovember}}{%
+						\ifthenelse{\equal{\theamonth}{12}}{\renewcommand\@@agendaMonth{\@languageDecember}}{}%
+	}}}}}}}}}}}%
+	\iftoggle{dutch}{\renewcommand\@@agendaDate{\theaday~\@@agendaMonth~\theayear}}{\renewcommand\@@agendaDate{\@@agendaMonth~\theaday,~\theayear}}
+}
+
+%%
+%% Variables for functions
+%%
+\newcommand\@@chairman{}
+\newcommand\@@minuteTaker{}
+
+\newcommand\chairman[1]{\renewcommand\@@chairman{#1}}
+\newcommand\minuteTaker[1]{
+	\renewcommand\@@minuteTaker{#1}
+	\def\minutetakers{\@@minuteTaker}
+}
+
+%%
+%% Variables for meetnumber (with superscript)
+%%
+\def\meetNumber{\@ifstar\@verNummerStar\@verNummerNoStar}
+\def\@verNummerNoStar{\@@meetingNumber\xspace}
+\def\@verNummerStar{\@@meetingNumbersc\xspace}
+
+%%
+%% Determine current meeting number superscript
+%%
+\newcommand\@meetingNumberDefault[1]{
+	\renewcommand\@@meetingNumber{#1}
+	\newcommand\@@rawNumber{#1}
+	\iftoggle{dutch}
+	{
+		\renewcommand\@@meetingNumbersc{\@@rawNumber\textsuperscript{e}}
+		\renewcommand\@@meetingNumbersconly{e}
+	}
+	{%Because English is great, we have this exception for numbers ending in 11, 12, 13
+		\StrRight{\@@rawNumber}{2}[\@@lastTwoNumbers]%
+		\ifthenelse{\@@lastTwoNumbers>10 \AND \@@lastTwoNumbers<14}{%
+			\renewcommand\@@meetingNumbersc{\@@rawNumber\textsuperscript{th}}%
+			\renewcommand\@@meetingNumbersconly{th}}%
+		{%Last two numbers are not 11, 12 or 13
+			\StrRight{\@@rawNumber}{1}[\@@lastNumber]%
+			\ifthenelse{\@@lastNumber>3 \OR \@@lastNumber=0}{%
+				\renewcommand\@@meetingNumbersc{\@@rawNumber\textsuperscript{th}}%
+				\renewcommand\@@meetingNumbersconly{th}}%
+			{%else
+				\ifthenelse{\@@lastNumber=3}{%
+					\renewcommand\@@meetingNumbersc{\@@rawNumber\textsuperscript{rd}}%
+					\renewcommand\@@meetingNumbersconly{rd}}%
+				{%else
+					\ifthenelse{\@@lastNumber=2}{%
+						\renewcommand\@@meetingNumbersc{\@@rawNumber\textsuperscript{nd}}%
+						\renewcommand\@@meetingNumbersconly{nd}}%
+					{%else
+						\renewcommand\@@meetingNumbersc{\@@rawNumber\textsuperscript{st}}%
+						\renewcommand\@@meetingNumbersconly{st}}%
+				}%
+			}%
+	}}%
+}
+
+%%
+%% Variables for lastmeetingsnumber (with superscript)
+%%
+\def\lastMeetNumber{\@ifstar\@lastMeetNumberStar\@lastMeetNumberNoStar}
+\def\@lastMeetNumberNoStar{\@@lastMeetingNumber\xspace}
+\def\@lastMeetNumberStar{\@@lastMeetingNumbersc\xspace}
+
+%%
+%% Determine last meeting number superscript
+%%
+\newcommand\@getLastMeetingNumber[1]{
+	\renewcommand\@@lastMeetingNumber{#1}
+	\newcommand\@@rawlastNumber{#1}
+	\iftoggle{dutch}
+	{\renewcommand\@@lastMeetingNumbersc{\@@rawlastNumber\textsuperscript{e}}}
+	{%Because English is great, we have this exception for numbers ending in 11, 12, 13
+		\StrRight{\@@rawlastNumber}{2}[\@@lastTwoNumbers]%
+		\ifthenelse{\@@lastTwoNumbers>10 \AND \@@lastTwoNumbers<14}{%
+			\renewcommand\@@lastMeetingNumbersc{\@@rawlastNumber\textsuperscript{th}}}
+		{%Last two numbers are not 11, 12 or 13
+			\StrRight{\@@rawlastNumber}{1}[\@@lastNumber]%
+			\ifthenelse{\@@lastNumber>3 \OR \@@lastNumber=0}{%
+				\renewcommand\@@lastMeetingNumbersc{\@@rawlastNumber\textsuperscript{th}}}
+			{%else
+				\ifthenelse{\@@lastNumber>2}{%
+					\renewcommand\@@lastMeetingNumbersc{\@@rawlastNumber\textsuperscript{rd}}}
+				{%else
+					\ifthenelse{\@@lastNumber<2}{%
+						\renewcommand\@@lastMeetingNumbersc{\@@rawlastNumber\textsuperscript{st}}}
+					{%else
+						\renewcommand\@@lastMeetingNumbersc{\@@rawlastNumber\textsuperscript{nd}}}%
+				}%
+			}%
+	}}%
+}
+
+
+%%
+%% Presence list
+%%
+\newcolumntype{L}[1]{>{\raggedright}p{#1}}
+\newcolumntype{C}[1]{>{\centering}p{#1}}
+\newcolumntype{R}[1]{>{\raggedleft}p{#1}}
+
+\newlength{\addWidth}
+\newlength{\addTempWidth}
+\newlength{\presenceWidth}
+
+\newcommand\bool{0}
+\newcommand\@presenceList{
+    \ifx\names\empty
+        \PackageError{GEWISAgendaMinutes}{\@backslashchar presenceList used while not setting \@backslashchar present. At least one person should be present/invited, or \@backslashchar presenceList should not be used}{}
+    \fi
+	\setlength\extrarowheight{3pt}%
+    \begin{tabular}{R{\presenceWidth} p{14.5cm-\presenceWidth}}
+	\textbf{\@languagePresent} & \readlist*\nameslist{\names} \readlist*\takerslist{\minutetakers}%remove whitespace
+	\renewcommand\bool{0}%
+	\foreachitem\name\in\nameslist[]{%
+		\ifthenelse{\equal{\name}{\@@chairman}}{%
+			\foreachitem\taker\in\takerslist[]{%
+				\ifthenelse{\equal{\name}{\taker}}{\renewcommand\bool{1}}{}%
+			}%		
+			\ifthenelse{\equal{\bool}{1}}{\name\ (\@languageChairman \&\ \@languageMinutetaker)}{\name\ (\@languageChairman)}%
+		}{}%
+	}%
+	\foreachitem\taker\in\takerslist[]{%
+		\ifnum\namecnt=1\else,\ \fi%
+		\ifthenelse{\not\equal{\taker}{\@@chairman}}{\taker\ (\@languageMinutetaker)}{}%
+	}%
+	\foreachitem\name\in\nameslist[]{%
+		\renewcommand\bool{0}%
+		\ifthenelse{\not\equal{\name}{\@@chairman}}{%
+			\foreachitem\taker\in\takerslist[]{%
+				\ifthenelse{\equal{\name}{\taker}}{\renewcommand\bool{1}}{}%
+			}%		
+			\ifthenelse{\not\equal{\bool}{1}}{%
+				\ifnum\namecnt=1\else,\ \fi%
+				\let\xspaceorig\xspace%
+				\let\xspace\empty%
+				\name%
+				\let\xspace\xspaceorig%	
+			}{}%
+		}{}%
+	} \\
+	\ifdefempty{\@@absentnotice}{}{\textbf{\@languageAbsentNotice} & \@@absentnotice \\}
+        \ifdefempty{\@@absent}{}{\textbf{\@languageAbsent} & \@@absent \\}
+        \ifdefempty{\@@guests}{}{\textbf{\@languageGuest} & \@@guests \\}
+    \end{tabular}
+    \vspace{5mm}
+
+
+}
+
+%%
+%% Defining name commands
+%%
+%% Arguments: First name, last name
+\newcommand{\newName}[2]{
+    \expandafter\def\csname #1\endcsname{%
+        {#2}\xspace%
+    }%
+    %\newcommand{\#1}{#1 #2}
+}
