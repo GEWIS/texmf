@@ -2,7 +2,7 @@ name: Compile LaTeX
 on: [push, pull_request]
 
 jobs:
-  document:
+  GEWISDocument:
     runs-on: ubuntu-20.04
     timeout-minutes: 25
 
@@ -16,15 +16,16 @@ jobs:
       with:
         path: |
           ~/.miktex
-        key: cache-v2-${{secrets.LATEX_VERSION}}
+          ~/latex-cache
+        key: cache-v3-${{secrets.LATEX_VERSION}}
         restore-keys: |
-          cache-v2
+          cache-v3
         
     - name: Install MikTeX using apt-get
-      # if: steps.cache-latex.outputs.cache-hit != 'true'
+      if: steps.cache-latex.outputs.cache-hit != 'true'
       env:
         CACHE_HIT: ${{steps.cache-latex.outputs.cache-hit}}
-        PACKAGES: "miktex"
+        PACKAGES: "miktex latexmk"
       run: |
         sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys D6BC243565B2087BC3F897C9277A7293F59E4889
         echo "deb http://ctan.net/systems/win32/miktex/setup/deb focal universe" | sudo tee /etc/apt/sources.list.d/miktex.list
@@ -34,17 +35,17 @@ jobs:
         mkdir -p ~/latex-cache
         sudo dpkg -L $PACKAGES | while IFS= read -r f; do if test -f $f; then echo $f; fi; done | xargs cp --parents --target-directory ~/latex-cache/
         
-    # - name: Install MikTeX from cache
-      # if: steps.cache-latex.outputs.cache-hit == 'true'
-      # env:
-        # CACHE_HIT: ${{steps.cache-latex.outputs.cache-hit}}
-        # PACKAGES: "miktex"
-      # run: |
-        # if [[ "$CACHE_HIT" == 'true' ]]; then
-          # sudo cp --verbose --force --recursive ~/latex-cache/* /
-        # else
-          # echo "This step should have been skipped"
-        # fi
+    - name: Install MikTeX from cache
+      if: steps.cache-latex.outputs.cache-hit == 'true'
+      env:
+        CACHE_HIT: ${{steps.cache-latex.outputs.cache-hit}}
+        PACKAGES: "miktex"
+      run: |
+        if [[ "$CACHE_HIT" == 'true' ]]; then
+          sudo cp --verbose --force --recursive ~/latex-cache/* /
+        else
+          echo "This step should have been skipped"
+        fi
         
     #- name: Setup SSH Keys and known_hosts
     #  env:
@@ -85,21 +86,15 @@ jobs:
         mpm --update-db
     - name: Compile test GEWISDocument using PdfLaTeX (3 runs)
       run: |
-        ~/bin/miktex-pdflatex -jobname="GEWISDocument" --interaction=nonstopmode --synctex=0 "compiletests/GEWISDocument.tex"
-        mv GEWISDocument.pdf GEWISDocument.run1.pdf
-        ~/bin/miktex-pdflatex -jobname="GEWISDocument" --interaction=nonstopmode --synctex=0 "compiletests/GEWISDocument.tex"
-        mv GEWISDocument.pdf GEWISDocument.run2.pdf
-        ~/bin/miktex-pdflatex -jobname="GEWISDocument" --interaction=nonstopmode --synctex=0 "compiletests/GEWISDocument.tex"
-        mv GEWISDocument.pdf GEWISDocument.run3.pdf
+        cd compiletests
+        latexmk GEWISDocument -bibtex -pdf -pdflatex="~/bin/miktex-pdflatex --interaction=nonstopmode --synctex=0 %O %S"
         
-    - name: Store GEWISDocument.pdf for all three runs
+    - name: Store GEWISDocument.pdf
       uses: actions/upload-artifact@v2
       with:
         name: GEWISDocument.pdf runs
         path: |
-          GEWISDocument.run1.pdf
-          GEWISDocument.run2.pdf
-          GEWISDocument.run3.pdf
+          compiletests/GEWISDocument.pdf
           
     - name: Export logs on failure
       if: failure()
