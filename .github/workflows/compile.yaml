@@ -13,7 +13,7 @@ jobs:
     steps:
     - name: Checkout this repository
       uses: actions/checkout@v2
-
+      
     - name: Prepare Cache .miktex folder because installing is slow
       uses: actions/cache@v2
       id: cache-latex
@@ -78,7 +78,8 @@ jobs:
         miktexsetup finish
         initexmf --set-config-value=[MPM]AutoInstall=yes
         mpm --pick-repository-url
-        initexmf --user-roots=$HOME/GEWIStexmf/texroot/ --update-fndb
+        initexmf --user-roots=$HOME/work/texmf/texmf/texroot/
+        initexmf --update-fndb=$HOME/work/texmf/texmf/texroot/
         
     - name: Update MikTeX
       if: steps.cache-latex.outputs.cache-hit != 'true'
@@ -88,17 +89,17 @@ jobs:
         mpm --update-db
     - name: Compile test GEWISDocument using PdfLaTeX (3 runs)
       run: |
-        ~/bin/miktex-pdflatex -jobname="Example" --interaction=nonstopmode --synctex=0 "compiletests/GEWISDocument.tex"
+        ~/bin/miktex-pdflatex -jobname="GEWISDocument" --interaction=nonstopmode --synctex=0 "compiletests/GEWISDocument.tex"
         mv GEWISDocument.pdf GEWISDocument.run1.pdf
-        ~/bin/miktex-pdflatex -jobname="Example" --interaction=nonstopmode --synctex=0 "compiletests/GEWISDocument.tex"
+        ~/bin/miktex-pdflatex -jobname="GEWISDocument" --interaction=nonstopmode --synctex=0 "compiletests/GEWISDocument.tex"
         mv GEWISDocument.pdf GEWISDocument.run2.pdf
-        ~/bin/miktex-pdflatex -jobname="Example" --interaction=nonstopmode --synctex=0 "compiletests/GEWISDocument.tex"
+        ~/bin/miktex-pdflatex -jobname="GEWISDocument" --interaction=nonstopmode --synctex=0 "compiletests/GEWISDocument.tex"
         mv GEWISDocument.pdf GEWISDocument.run3.pdf
         
-    - name: Store example.pdf for all three runs
+    - name: Store GEWISDocument.pdf for all three runs
       uses: actions/upload-artifact@v2
       with:
-        name: Example.pdf runs
+        name: GEWISDocument.pdf runs
         path: |
           GEWISDocument.run1.pdf
           GEWISDocument.run2.pdf
