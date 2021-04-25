@@ -1,0 +1,121 @@
+name: Compile LaTeX
+on:
+  push:
+    branches: [ dev-v1 ]
+  pull_request:
+    branches: [ dev-v1 ]
+
+jobs:
+  document:
+    runs-on: ubuntu-20.04
+    timeout-minutes: 25
+
+    steps:
+    - name: Checkout this repository
+      uses: actions/checkout@v2
+
+    - name: Prepare Cache .miktex folder because installing is slow
+      uses: actions/cache@v2
+      id: cache-latex
+      with:
+        path: |
+          ~/.miktex
+        key: cache-v1-${{secrets.LATEX_VERSION}}
+        restore-keys: |
+          cache-v1
+        
+    - name: Install MikTeX using apt-get
+      # if: steps.cache-latex.outputs.cache-hit != 'true'
+      env:
+        CACHE_HIT: ${{steps.cache-latex.outputs.cache-hit}}
+        PACKAGES: "miktex"
+      run: |
+        sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys D6BC243565B2087BC3F897C9277A7293F59E4889
+        echo "deb http://ctan.cs.uu.nl/systems/win32/miktex/setup/deb focal universe" | sudo tee /etc/apt/sources.list.d/miktex.list
+        sudo apt-get update
+        sudo apt-get install --yes $PACKAGES
+        sudo apt-cache policy $PACKAGES
+        mkdir -p ~/latex-cache
+        sudo dpkg -L $PACKAGES | while IFS= read -r f; do if test -f $f; then echo $f; fi; done | xargs cp --parents --target-directory ~/latex-cache/
+        
+    # - name: Install MikTeX from cache
+      # if: steps.cache-latex.outputs.cache-hit == 'true'
+      # env:
+        # CACHE_HIT: ${{steps.cache-latex.outputs.cache-hit}}
+        # PACKAGES: "miktex"
+      # run: |
+        # if [[ "$CACHE_HIT" == 'true' ]]; then
+          # sudo cp --verbose --force --recursive ~/latex-cache/* /
+        # else
+          # echo "This step should have been skipped"
+        # fi
+        
+    #- name: Setup SSH Keys and known_hosts
+    #  env:
+    #    SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+    #  run: |
+    #    mkdir -p ~/.ssh
+    #    ssh-keyscan github.com >> ~/.ssh/known_hosts
+    #    ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+    #    ssh-add - <<< "${{ secrets.TEXMF_DEPLOYKEY }}"
+        
+    #- name: Clone or pull texmf root
+    #  if: steps.cache-latex.outputs.cache-hit != 'true'
+    #  env:
+    #    SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+    #    CACHE_HIT: ${{steps.cache-latex.outputs.cache-hit}}
+    #  run: |
+    #    if [ -d "$HOME/GEWIStexmf" ]; then
+    #        pushd $HOME/GEWIStexmf
+    #        git pull
+    #        popd
+    #    else
+    #        git clone --single-branch --depth 1 --branch=dev git@github.com:GEWISstijl/texmf.git $HOME/GEWIStexmf/
+    #    fi
+        
+    - name: Setup and configure MikTeX
+      run: |
+        miktexsetup finish
+        initexmf --set-config-value=[MPM]AutoInstall=yes
+        mpm --set-repository=http://ctan.cs.uu.nl/systems/win32/miktex/tm/packages/
+        initexmf --user-roots=$HOME/GEWIStexmf/
+        
+    - name: Update MikTeX
+      if: steps.cache-latex.outputs.cache-hit != 'true'
+      run: |
+        mpm --upgrade --package-level=essential
+        mpm --update
+        mpm --update-db
+    - name: Compile test GEWISDocument using PdfLaTeX (3 runs)
+      run: |
+        ~/bin/miktex-pdflatex -jobname="Example" --interaction=nonstopmode --synctex=0 "compiletests/GEWISDocument.tex"
+        mv GEWISDocument.pdf GEWISDocument.run1.pdf
+        ~/bin/miktex-pdflatex -jobname="Example" --interaction=nonstopmode --synctex=0 "compiletests/GEWISDocument.tex"
+        mv GEWISDocument.pdf GEWISDocument.run2.pdf
+        ~/bin/miktex-pdflatex -jobname="Example" --interaction=nonstopmode --synctex=0 "compiletests/GEWISDocument.tex"
+        mv GEWISDocument.pdf GEWISDocument.run3.pdf
+        
+    - name: Store example.pdf for all three runs
+      uses: actions/upload-artifact@v2
+      with:
+        name: Example.pdf runs
+        path: |
+          GEWISDocument.run1.pdf
+          GEWISDocument.run2.pdf
+          GEWISDocument.run3.pdf
+          
+    - name: Export logs on failure
+      if: failure()
+      uses: actions/upload-artifact@v2
+      with:
+        name: Export of logs
+        path: |
+          ~/.miktex/texmfs/data/miktex/log/
+          
+    - name: Export .miktex on success and when not cached
+      if: success() && steps.cache-latex.outputs.cache-hit != 'true'
+      uses: actions/upload-artifact@v2
+      with:
+        name: Export of .miktex
+        path: |
+          ~/.miktex/

@@ -1,0 +1,101 @@
+%% GEWIS Letterhead Template
+%% Stijl
+%% All documentation can be found on https://gewis.nl/~stijl/
+
+\documentclass[
+ digital,         % Use toggle digital to include letterhad in exported pdf
+ %printletterhead,% Use toggle printbackground to print letterhead in exported pdf - implies digital
+ %english         % Use toggle English for having the template printed in English. You might need to clear all compiled files to prevent having errors after switching the language
+]{GEWISLetter}
+
+%% This example letter requires version 1.0 of the GEWISLetter package, which was released on April 0, 2020
+\makeatletter
+    \@ifclasslater{GEWISLetter}{2020/05/09}{}{
+        \ClassError{GEWISLetter}{Dit voorbeeld vereist GEWISLetter v1.0 of hoger}%
+    }
+\makeatother
+
+%% In this example we show some Lorem Ipsum; it is not neccessary to include this package if you are not going to use it
+\usepackage{lipsum}
+
+%% In case we want to use a different sender or contact details, we set it here
+%\setSenderName{Ouderdagcommissie}
+%\setSenderMail{odc@gewis.nl}
+%\setSenderPhone{+31 123 456789}
+%\setSenderWeb{odc.gewis.nl}
+
+%% Set the recipient (required parameters have to be set, but can be set as empty string if needed)
+\setType{Persoonlijk}           % (optional) Set the Type which is printed above the address - e.g. "Confidential"
+\setRecipient{Het Sprookjesbos} % (required) Set the recipient for this letter
+\setAttn{Roodkapje}             % (optional) Set the "Attn."/"T.a.v." line in the address
+
+\setStreet{Europalaan 1}        % (required) Set the address of the recipient (for Dutch addresses usually street + number)
+\setPostcode{5171 KW}           % (required) Set postal code
+\setCity{Kaatsheuvel}           % (required) Set city of recipient
+%\setPostcodecity{2020}         % (optional) For countries that don't use postal code + city addressing, you may want to set the line differently
+%\setCountry{The Netherlands}   % (optional) Set the country of the recipient
+
+%% Set letter properties
+\setYourreference{KHM26}        % (optional) Set the reference ("Uw kenmerk") the recipient uses/used
+\setMyreference{32768}          % (optional) Set your own reference ("Ons kenmerk")
+\setSubject{De Grote Boze Wolf} % (highly recommended) Set the subject of the letter
+
+\setDate{\today}                % (highly recommended) Set the date the letter is to be sent/was sent
+
+%% Usually you dont wan't the names of peprsons to be split to multiple lines, so you can define them here
+%% You can also define new commands to be able to reuse the names or other variables. Using tildes instead of space, allows you to prevent linebreaks within the command
+\newcommand{\dewolf}{De~Grote~Boze~Wolf\xspace}
+\hyphenation{De Grote Boze Wolf}
+\newcommand{\rood}{Roodkapje\xspace}
+\hyphenation{Roodkapjë}
+
+%% Now it is time to start the letter
+\begin{document}
+\GEWISfirstpage                 % We want to print the address information of GEWIS on the first page
+\printadresenkenmerk            % We want to print the information we just set on the first page
+
+%% We now can write the letter - Note that we can use the variables we set for the names
+Geachte heer/mevrouw \rood,\\
+
+%% We can also use the variables we set for the address to repeat the recipients details e.g.
+Namens Studievereniging GEWIS mag ik u meedelen dat we onlangs uw bestelling van rode kapjes met GEWIS-logo's verstuurd hebben naar uw adres (\GEWISstreet, \GEWISpostcodecity).\\
+
+In de bijlage vindt u een overzicht van de kosten.\\
+
+\lipsum[1]\\
+
+\lipsum[2-5]
+
+Met vriendelijke groet,\\[3\baselineskip] \\
+\dewolf\\
+Commissaris Sprookjesactige Betrekkingen GEWIS 2020-2021
+
+
+%% Perhaps we want the attachment to start with page 1 again
+\resetpagecount
+%% Maybe we want to hide the GEWIS logo in the top right corner (can be undone by \GEWISlargeheading)
+%% Note that this is not suitable for printed letters, since we only have preprinted full pages
+\GEWISsmallheading
+\newpage
+\subsection{Financi\"en}
+\begin{tabularx}{\textwidth}{X r}\toprule
+	Beschrijving           & Bedrag(EUR)\\\midrule
+	37 Rode kapjes         & 500,00\\
+	37 Stenen voor de wolf & 800,00\\
+	\cmidrule{2-2} \textbf{Totaal} & {\bfseries 1.300,00}\\\bottomrule
+\end{tabularx}
+
+
+
+%% Maybe we want some other attachment to start with a fresh page count, or we are generating letters in some kind of fancy for-loop
+%% We reset the page count
+\resetpagecount
+%%We update the recipient and print all the information again
+\setRecipient{De Efteling}
+\GEWISfirstpage
+\printadresenkenmerk
+
+\lipsum[1]
+
+
+\end{document}
