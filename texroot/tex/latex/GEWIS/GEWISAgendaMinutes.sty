@@ -1,0 +1,517 @@
+%% GEWIS Minutes and Agenda Tex style v1.0
+%% Stijl - Gijs de Man, Rink Pieters
+
+\NeedsTeXFormat{LaTeX2e} 
+\ProvidesPackage{GEWISAgendaMinutes}[2021/04/15 GEWIS Agenda and Minutes Package]
+
+% Version control
+\def\@@majorVersion{1}
+\newcommand{\@agendaMinutesMajorVersion}[1]{
+	\ifnum\numexpr#1\relax=\numexpr\@@majorVersion\relax\else
+	\PackageError{GEWISAgendaMinutes}{Major version mismatch. Check corporate identity for more information.}
+	\fi
+}
+
+%%
+%% Packages used for both agenda and minutes
+%%
+\usepackage[dutch,english]{babel}	% Language settings
+\usepackage{datatool} 		% Used for storing names, actions points, ad etc.
+\usepackage{listofitems}	% Package for processing list of items
+\usepackage[useregional]{datetime2}	% For parsing dates in easy way
+\usepackage{array} 			% Additional tabular column options
+\usepackage{calc} 			% For getting length of strings
+\usepackage[shortlabels]{enumitem}		% General package for enums 
+\usepackage{xspace}			% Automatically add whitespace after commands if necessary
+\usepackage{longtable} 		% For tables that span over mulitple pages
+
+%%
+%% Creation of toggles for various options
+%%
+
+% Throw errors for clashing options
+\iftoggle{GMM}{
+	\iftoggle{CM}{\PackageError{GEWISAgendaMinutes}{Parameter mismatch: Cannot use both the GMM and the CM toggle}\relax}
+	\iftoggle{BM}{\PackageError{GEWISAgendaMinutes}{Parameter mismatch: Cannot use both the GMM and the BM toggle}\relax}
+}
+
+\iftoggle{CM}{
+	\iftoggle{BM}{\PackageError{GEWISAgendaMinutes}{Parameter mismatch: Cannot use both the CM and the BM toggle}{}}%
+}
+
+%%
+%% Language options used for both agenda and minutes
+%%
+% For presencelist
+\newcommand\@languagePresent{Present\xspace}
+\newcommand\@languageAbsentNotice{Apologies\xspace}
+\newcommand\@languageAbsent{Absent\xspace}
+\newcommand\@languageGuest{Guests\xspace}
+\newcommand\@languageMinutetaker{minute\nobreakspace taker\xspace}
+\newcommand\@languageChairman{chair\xspace}
+
+% For header of agenda
+\newcommand\@languageOf{of\xspace}
+\newcommand\@languageMeeting{meeting}
+\renewcommand\@languageAlt{\@languageMeeting}
+\iftoggle{CM}{
+	\renewcommand\@languageAlt{Chair's Meeting}
+}\relax
+\iftoggle{BM}{
+	\renewcommand\@languageAlt{board meeting}
+}\relax
+\iftoggle{GMM}{
+	\renewcommand\@languageAlt{General Members Meeting}
+}\relax
+
+% For left footer of agenda
+\newcommand\@languageVersion{version\xspace}
+
+% For action table at end of agenda
+\newcommand\@languageNumber{No.\xspace}
+\newcommand\@languageName{Name\xspace}
+\newcommand\@languageAction{Action\xspace}
+\newcommand\@languageDeadline{Deadline\xspace}
+
+\selectlanguage{english}
+
+% Create Dutch option
+\iftoggle{dutch}{
+	% For presencelist
+	\renewcommand\@languagePresent{Aanwezig\xspace}
+	\renewcommand\@languageAbsentNotice{Afgemeld\xspace}
+	\renewcommand\@languageAbsent{Afwezig\xspace}
+	\renewcommand\@languageGuest{Toehoorders\xspace}
+	\renewcommand\@languageMinutetaker{not.\xspace}
+	\renewcommand\@languageChairman{voorz.\xspace}
+	
+	% For header of agenda
+	\renewcommand\@languageOf{van\xspace}
+	\renewcommand\@languageMeeting{vergadering}
+	\renewcommand\@languageAlt{\@languageMeeting}
+	\iftoggle{CM}{
+		\renewcommand\@languageAlt{voorzittersvergadering}
+	}\relax
+	\iftoggle{BM}{
+		\renewcommand\@languageAlt{bestuursvergadering}
+	}\relax
+	\iftoggle{GMM}{
+		\renewcommand\@languageAlt{Algemene Leden Vergadering}	
+	}\relax
+	
+	% For left footer of agenda
+	\renewcommand\@languageVersion{versie\xspace}
+	
+	% For action table at end of agenda
+	\renewcommand\@languageNumber{Nr.\xspace}
+	\renewcommand\@languageName{Naam\xspace}
+	\renewcommand\@languageAction{Actie\xspace}
+	\renewcommand\@languageDeadline{Deadline\xspace}
+	
+	\selectlanguage{dutch}
+}
+
+% Spacing before and after longtable
+\setlength{\LTpre}{0.5em}
+\setlength{\LTpost}{0.5em}
+\setlength\parindent{0pt}
+
+%%
+%% Variables used in the GEWISAgendaMinutes package
+%%
+\newcommand\@@organName{}
+\newcommand\@@organAbr{}
+\newcommand\@@meetingNumberPrefix{}
+\newcommand\@@meetingNumber{}
+\newcommand\@@lastMeetingNumber{}
+\newcommand\@@meetingNumbersc{}
+\newcommand\@@meetingNumbersconly{}
+\newcommand\@@lastMeetingNumbersconly{}
+\newcommand\@@lastMeetingNumbersc{}
+\newcommand\@@meetingDate{}
+\newcommand\@@meetingTime{}
+\newcommand\@@meetingLocation{}
+\newcommand\@@agendaVersion{}
+\newcommand\@@agendaDate{}
+
+\newcommand\organName[1]{\renewcommand\@@organName{#1}}
+\newcommand\organAbr[1]{\renewcommand\@@organAbr{#1}}
+\newcommand\meetingTime[1]{\renewcommand\@@meetingTime{#1}}
+\newcommand\meetingLocation[1]{\renewcommand\@@meetingLocation{#1}}
+\newcommand\minutesVersion[2]{\renewcommand\@@agendaVersion{#1}}
+\newcommand\agendaVersion[1]{\renewcommand\@@agendaVersion{#1}}
+
+\newcommand\@@chairman{}
+\newcommand\@@minuteTaker{}
+\newcommand\@@present{}
+\newcommand\@@absentnotice{}
+\newcommand\@@absent{}
+\newcommand\@@guests{}
+
+%%
+%% Setting date of meeting and minutes
+%% 
+\newcounter{meetingDay}
+\newcounter{meetingMonth}
+\newcounter{meetingYear}
+\newcounter{agendaDay}
+\newcounter{agendaMonth}
+\newcounter{agendaYear}
+\newcommand\@@meetingMonth{}
+\newcommand\@@agendaMonth{}
+\newcommand\@@agendaDay{}
+
+\newcommand\meetingDate[3]{%
+	\setcounter{meetingDay}{#1}
+	\setcounter{meetingMonth}{#2}
+	\setcounter{meetingYear}{#3}	
+	\renewcommand\@@meetingDate{\DTMdisplaydate{\themeetingYear}{\themeetingMonth}{\themeetingDay}{-1}}	
+}
+
+\newcommand\minutesDate[3]{\agendaDate{#1}{#2}{#3}}
+\newcommand\agendaDate[3]{
+	\setcounter{agendaDay}{#1}
+	\setcounter{agendaMonth}{#2}
+	\setcounter{agendaYear}{#3}
+	\renewcommand\@@agendaDate{\DTMdisplaydate{\theagendaYear}{\theagendaMonth}{\theagendaDay}{-1}}
+}
+
+%%
+%% Commando for setting a list of names
+%%
+\newcounter{getnames}
+\newcounter{getnamessize}
+\newcommand\getnames[1]{%
+	\def\getnameslist{#1}%
+	\readlist*\nameslist{\getnameslist}%
+	\setcounter{getnames}{0}%
+	\setcounter{getnamessize}{-1}%
+	\foreachitem\name\in\nameslist[]{%
+		\stepcounter{getnamessize}%
+	}%
+	\foreachitem\name\in\nameslist[]{%
+		\let\xspaceorig\xspace%
+		\let\xspace\empty%
+		\ifnum\thegetnames=0\else\ifnum\thegetnamessize=\thegetnames\ \&\ \else,\ \fi\fi%
+		\stepcounter{getnames}%
+		\name%
+		\let\xspace\xspaceorig%	
+	}%
+}
+
+%%
+%% Set the meetingnumber of the meeting
+%%
+\newcommand\meetingNumberPrefix[1]{
+	\renewcommand\@@meetingNumberPrefix{#1}
+}
+
+\newcommand\meetingNumber[2][nil]{
+	% Check if superscript is given
+	\ifthenelse{\equal{#1}{nil}}{
+		% Check if given number is numeric, set superscript accordingly
+		\if\relax\detokenize\expandafter{\romannumeral-0#2}\relax
+		\@meetingNumberDefault{#2}
+		\newcounter{lastnm}
+		\setcounter{lastnm}{\numexpr #2 - 1\relax}
+		\@meetingNumberLast{\thelastnm}
+		\else
+		% Throw error if not numeric
+		\PackageError{GEWISAgendaMinutes}{Meetingnumber not numeric. Use alternative command.}\relax
+		\fi
+	}{
+		% Set superscript manually
+		\renewcommand\@@meetingNumber{\@@meetingNumberPrefix#2}
+		\renewcommand\@@meetingNumbersc{\@@meetingNumberPrefix#2\textsuperscript{#1}}
+		\renewcommand\@@meetingNumbersconly{#1}
+	}
+}
+
+\newcommand\lastmeetingNumber[2][nil]{
+	% Check if superscript is given
+	\ifthenelse{\equal{#1}{nil}}{
+		% Check if given number is numeric, set superscript accordingly
+		\if\relax\detokenize\expandafter{\romannumeral-0#2}\relax
+			\@meetingNumberLast{#2}
+		\else
+			% Throw error if not numeric
+			\PackageError{GEWISAgendaMinutes}{Meetingnumber not numeric. Use alternative command.}\relax
+		\fi
+	}{
+		% Set superscript manually
+		\renewcommand\@@lastMeetingNumber{#2}
+		\renewcommand\@@lastMeetingNumbersc{#2\textsuperscript{#1}}
+		\renewcommand\@@lastMeetingNumbersconly{#1}
+	}
+}
+
+%% Variables for meetnumber (with superscript)
+\def\meeting{\@ifstar\@verNummerStar\@verNummerNoStar}
+\def\@verNummerNoStar{\@@meetingNumber\xspace}
+\def\@verNummerStar{\@@meetingNumbersc\xspace}
+
+\def\lastMeeting{\@ifstar\@lastMeetNumberStar\@lastMeetNumberNoStar}
+\def\@lastMeetNumberNoStar{\@@lastMeetingNumber\xspace}
+\def\@lastMeetNumberStar{\@@lastMeetingNumbersc\xspace}
+
+% Code from nth package (https://ctan.org/pkg/nth?lang=en)
+\def\xth#1{%
+	\ifnum#1<0 th\else%
+	\expandafter \xthSuff \expandafter 0\number\ifnum #1<0-\fi#1\delimiter%
+	\fi%
+}
+
+\def\xthSuff#1#2#3{%
+	\ifx \delimiter#3%
+	\ifnum #1=1 th%
+	\else\ifcase #2 th\or st\or nd\or rd\else th\fi%
+	\fi%
+	\else%
+	\expandafter \xthSuff \expandafter #2\expandafter #3%
+	\fi
+}
+
+%% Set meeting number variables
+\newcommand\@meetingNumberDefault[1]{
+	\renewcommand\@@meetingNumber{#1}
+	\iftoggle{dutch}{
+		\renewcommand\@@meetingNumbersc{\@@meetingNumberPrefix#1\textsuperscript{e}}
+		\renewcommand\@@meetingNumbersconly{e}
+	}{
+		\renewcommand\@@meetingNumbersc{\@@meetingNumberPrefix#1\textsuperscript{\xth{#1}}}
+		\renewcommand\@@meetingNumbersconly{\xth{#1}}
+	}
+}
+
+%% Set last meeting number variables
+\newcommand\@meetingNumberLast[1]{
+	\renewcommand\@@lastMeetingNumber{#1}
+	\iftoggle{dutch}{
+		\renewcommand\@@lastMeetingNumbersc{\@@meetingNumberPrefix#1\textsuperscript{e}}
+		\renewcommand\@@lastMeetingNumbersconly{e}
+	}{
+		\renewcommand\@@lastMeetingNumbersc{\@@meetingNumberPrefix#1\textsuperscript{\xth{#1}}}
+		\renewcommand\@@lastMeetingNumbersconly{\xth{#1}}
+	}
+}
+
+%%
+%% Presence list
+%%
+\newlength{\presenceWidth}
+\newlength{\tempPresWidth}
+
+\newbool{mt}
+\setbool{mt}{false}
+\newbool{cm}
+\setbool{cm}{false}
+
+\newcommand\chair[1]{\renewcommand\@@chairman{#1}}
+\newcommand\minuteTaker[1]{
+	\renewcommand\@@minuteTaker{#1}
+	\def\minutetakers{\@@minuteTaker}
+}
+
+% Check if starred or not, column widths are variable
+\newcommand\present{\@ifstar{\@invited}{\@notinvited}}
+
+% Create invited in case you are not sure who are going to show up or not
+\newcommand\@invited[1]{
+	\iftoggle{dutch}{\renewcommand\@languagePresent{Uitgenodigd\xspace}}{\renewcommand\@languagePresent{Invited\xspace}}
+	\settowidth{\presenceWidth}{\@languagePresent}
+	\renewcommand\@@present{#1}
+
+}
+
+% Create list as normal, with present, absend and notice
+\newcommand\@notinvited[1]{
+	\iftoggle{dutch}{\renewcommand\@languagePresent{Aanwezig\xspace}}{\renewcommand\@languagePresent{Present\xspace}}
+	\settowidth{\tempPresWidth}{\@languagePresent}
+	\ifdim \the\tempPresWidth > \the\presenceWidth
+	\settowidth{\presenceWidth}{\@languagePresent}\fi
+	\renewcommand\@@present{#1}
+}
+
+\newcommand\absentNotice[1]{
+	\settowidth{\tempPresWidth}{\@languageAbsentNotice}
+	\ifdim \the\tempPresWidth > \the\presenceWidth
+	\settowidth{\presenceWidth}{\@languageAbsentNotice}\fi
+	\renewcommand\@@absentnotice{#1}
+}
+
+\newcommand\absent[1]{\renewcommand\@@absent{#1}}
+
+% Possible guests
+\newcommand\guests[1]{
+	\renewcommand\@@guests{#1}
+	\settowidth{\tempPresWidth}{\@languageGuest}%
+	\ifdim \the\tempPresWidth > \the\presenceWidth%
+	\settowidth{\presenceWidth}{\@languageGuest}\fi%
+}
+
+% Printing the presencelist, in order, with right labels
+\newcommand\@presenceList{
+	% Check if any attendees are given
+	\def\names{\@@present}
+	\ifx\names\empty
+	\PackageError{GEWISAgendaMinutes}{\@backslashchar presenceList used while not setting \@backslashchar present. At least one person should be present/invited, or \@backslashchar presenceList should not be used}\relax
+	\fi
+	% Set all definitions of names
+	\def\namesabsent{\@@absent}
+	\def\namesabsentnotice{\@@absentnotice}
+	\def\guests{\@@guests}
+	% Change names such that they can be 'broken'
+	\def ~{\ }
+	% Set all counters
+	\newcounter{names}
+	\setcounter{names}{0}
+	\newcounter{namessize}
+	\setcounter{namessize}{-1}
+	\newcounter{absentsize}
+	\setcounter{absentsize}{-1}
+	\newcounter{absentnotsize}
+	\setcounter{absentnotsize}{-1}
+	% Begin the tabular
+	\setlength\extrarowheight{3pt}
+	\begin{tabular}{@{}p{\presenceWidth} p{14.5cm-\presenceWidth}}
+		% Remove white
+		\textbf{\@languagePresent} & \readlist*\nameslist{\names} \readlist*\takerslist{\minutetakers}
+		\setbool{mt}{false}
+		\DeclareTextFontCommand{\textbf}\relax
+		% Print print chairman (and possibly minute taker)
+		\foreachitem\name\in\nameslist[]{%
+			\stepcounter{namessize}%
+			\ifthenelse{\equal{\name}{\@@chairman}}{%
+				\addtocounter{namessize}{-1}%
+				\foreachitem\taker\in\takerslist[]{%
+					\ifthenelse{\equal{\name}{\taker}}{\setbool{mt}{true}}{}%
+				}%		
+				\ifbool{mt}{\name\ (\@languageChairman\ \&\ \@languageMinutetaker)}{\name\ (\@languageChairman)}%
+				\setbool{cm}{true}%
+			}\relax%
+		}%
+		\ifbool{cm}{\ifthenelse{\equal{\thenamessize}{-1}}{}{\ifthenelse{\equal{\thenamessize}{0}}{\ \&\ }{,\ }}}{\PackageWarning{GEWISAgendaMinutes}{Chair error: Cannot find chair in presencelist.}\relax}%
+		% Print minute takers
+		\foreachitem\name\in\nameslist[]{%
+			\foreachitem\taker\in\takerslist[]{%
+				\ifthenelse{\equal{\name}{\taker} \AND \not\equal{\taker}{\@@chairman}}{%
+					\addtocounter{namessize}{-1}%
+					\taker\ (\@languageMinutetaker)%
+					\ifthenelse{\equal{\thenamessize}{-1}}{}{\ifthenelse{\equal{\thenamessize}{0}}{\ \&\ }{,\ }}%
+					\setbool{mt}{true}%
+				}\relax%
+		}}%
+		\ifbool{mt}{}{\PackageWarning{GEWISAgendaMinutes}{Minutetaker error: Cannot find minutetaker(s) in presencelist.}\relax}%
+		% Print all names in nameslist
+		\foreachitem\name\in\nameslist[]{%
+			\setbool{mt}{false}%
+			\ifthenelse{\not\equal{\name}{\@@chairman}}{%
+				\foreachitem\taker\in\takerslist[]{%
+					\ifthenelse{\equal{\name}{\taker}}{\setbool{mt}{true}}{}%
+				}%	
+				\ifbool{mt}{}{%
+					\ifnum\thenames=0\else\ifnum\thenamessize=\thenames\ \&\ \else,\ \fi\fi%
+					\stepcounter{names}%
+					\let\xspaceorig\xspace%
+					\let\xspace\empty%
+					\name%
+					\let\xspace\xspaceorig%	
+				}%
+			}\relax
+		}
+		% Print all people absent with notice
+		\DeclareTextFontCommand{\textbf}{\bfseries}
+		\ifdefempty{\@@absent}{}{\\%
+			\setcounter{namessize}{-1}%
+			\readlist*\absentlist{\namesabsent}%remove whitespace
+			\foreachitem\person\in\absentlist[]{%
+				\stepcounter{namessize}%
+			}%	
+			\textbf{\@languageAbsent} & \readlist*\absentlist{\namesabsent}%remove whitespace
+			\setcounter{names}{0}%
+			\DeclareTextFontCommand{\textbf}{}%
+			\foreachitem\person\in\absentlist[]{%
+				\let\xspaceorig\xspace%
+				\let\xspace\empty%
+				\ifnum\thenames=0\else\ifnum\thenamessize=\thenames\ \&\ \else,\ \fi\fi%
+				\stepcounter{names}%
+				\person%
+				\let\xspace\xspaceorig%	
+			}%
+			\DeclareTextFontCommand{\textbf}{\bfseries}%
+		}
+		% Print all people absent with notice
+		\ifdefempty{\@@absentnotice}{}{\\%
+			\setcounter{namessize}{-1}%
+			\readlist*\absentnoticelist{\namesabsentnotice}%remove whitespace
+			\foreachitem\person\in\absentnoticelist[]{%
+				\stepcounter{namessize}%
+			}%	
+			\textbf{\@languageAbsentNotice} & \readlist*\absentnoticelist{\namesabsentnotice}%remove whitespace
+			\setcounter{names}{0}%
+			\DeclareTextFontCommand{\textbf}{}%
+			\foreachitem\person\in\absentnoticelist[]{%
+				\let\xspaceorig\xspace%
+				\let\xspace\empty%
+				\ifnum\thenames=0\else\ifnum\thenamessize=\thenames\ \&\ \else,\ \fi\fi%
+				\stepcounter{names}%
+				\person%
+				\let\xspace\xspaceorig%	
+			}%
+			\DeclareTextFontCommand{\textbf}{\bfseries}%
+		}
+		% Print guestlist
+		\ifdefempty{\@@guests}{}{\\%
+			\setcounter{namessize}{-1}%
+			\readlist*\guestlist{\guests}%remove whitespace
+			\foreachitem\person\in\guestlist[]{%
+				\stepcounter{namessize}%
+			}%	
+			\textbf{\@languageGuest} & \readlist*\guestlist{\guests}%remove whitespace
+			\setcounter{names}{0}%
+			\DeclareTextFontCommand{\textbf}{}%
+			\foreachitem\person\in\guestlist[]{%
+				\let\xspaceorig\xspace%
+				\let\xspace\empty%
+				\ifnum\thenames=0\else\ifnum\thenamessize=\thenames\ \&\ \else,\ \fi\fi%
+				\stepcounter{names}%
+				\person%
+				\let\xspace\xspaceorig%	
+			}
+			\DeclareTextFontCommand{\textbf}{\bfseries}%
+		}
+	% Make tilde act like normal again
+	\def ~{\nobreakspace}
+	\end{tabular}
+}
+
+%%
+%% Defining name commands
+%%
+%% Arguments: First name, last name
+\newcommand{\newName}[2]{
+	\expandafter\def\csname #1\endcsname{%
+		\textbf{#2}\xspace
+	}%
+}
+
+%%
+%% Hyperref text
+%%
+\DeclareFontFamily{U}{fontawesome1}{}
+\DeclareFontShape{U}{fontawesome1}{m}{n}{<->FontAwesome--fontawesomeone}{}
+\DeclareFontFamily{U}{fontawesome2}{}
+\DeclareFontShape{U}{fontawesome2}{m}{n}{<->FontAwesome--fontawesometwo}{}
+\DeclareFontFamily{U}{fontawesome3}{}
+\DeclareFontShape{U}{fontawesome3}{m}{n}{<->FontAwesome--fontawesomethree}{}
+\DeclareRobustCommand{\FAone}{\usefont{U}{fontawesome1}{m}{n}}
+\DeclareRobustCommand{\FAtwo}{\usefont{U}{fontawesome2}{m}{n}}
+\DeclareRobustCommand{\FAthree}{\usefont{U}{fontawesome3}{m}{n}}
+
+\let\@href\href
+\iftoggle{printversion}{}{
+	\iftoggle{posterversion}{}{%
+	\renewcommand\href[2]{%
+    	\@href{#1}{#2~\tiny\faHandPointerO}}%
+    }%
+}
