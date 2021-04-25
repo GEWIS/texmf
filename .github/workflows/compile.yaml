@@ -1,9 +1,5 @@
 name: Compile LaTeX
-on:
-  push:
-    branches: [ dev-v1 ]
-  pull_request:
-    branches: [ dev-v1 ]
+on: [push, pull_request]
 
 jobs:
   document:
@@ -20,9 +16,9 @@ jobs:
       with:
         path: |
           ~/.miktex
-        key: cache-v1-${{secrets.LATEX_VERSION}}
+        key: cache-v2-${{secrets.LATEX_VERSION}}
         restore-keys: |
-          cache-v1
+          cache-v2
         
     - name: Install MikTeX using apt-get
       # if: steps.cache-latex.outputs.cache-hit != 'true'
