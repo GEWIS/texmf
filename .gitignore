@@ -1,4 +1,6 @@
+texroot/biber/
 texroot/dvips/
-texroot/fonts/map/dvips/
+texroot/fontconfig/
 texroot/miktex/
 texroot/tex/generic/config/
+texroot/tex/plain/config/
