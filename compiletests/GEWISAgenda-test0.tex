@@ -1,0 +1,81 @@
+%% GEWIS Agenda Template
+%% Stijl
+%% All documentation can be found on https://gewis.nl/corporateidentity/document/agenda
+
+\documentclass[
+%	printversion,
+%dutch,
+notes,
+minutesversion,
+]{GEWISAgenda}
+
+%%This example agenda requires major version 1.x for compatibility
+\agendaMajorVersion{1}
+
+%%Setting the details about the organ
+\usepackage[stijl]{GEWISCommitteeInfo}
+
+%%Setting the details about this meeting
+\meetingNumber[e]{N+35}
+\lastmeetingNumber[e]{N+34}
+\meetingDate{8}{4}{2021}
+\meetingTime{12:40}
+\meetingLocation{Teams}
+
+\minutesDate{\day}{\month}{\year}
+\agendaVersion{1.0}
+
+%%Setting the functions
+\chair{\sanne}
+\minuteTaker{\ava}
+
+%%Setting the presence
+\present{\sanne, \rink, \gijs, \nicky, \ava}
+\absentNotice{}
+\absent{}
+\guests{}
+
+\begin{document}
+	\opening
+		\note{joo}
+	\DFA
+	\announcements
+	\minutes
+	\actionPoints
+	\begin{actionlist}
+		\actionitem{N+34.3.1}{8-4-2021}{\sanne}{Mailen over de verwoording van het voortbestaan van Stijl in de notulen van de BV.}
+		\actionitem{N+34.4.1}{De eerste fysieke vergadering}{\sanne}{Vlaai meenemen naar de eerste fysieke vergadering}
+		\actionitem{N+34.4.2}{8-4-2021}{\rink}{In de letterhead logo’s aanpassen waar ze niet horen te staan.}
+		\actionitem{N+34.4.3}{1-5-2021}{\rink}{Website fixen.}
+		\actionitem{N+34.7.1}{8-4-2021}{\gijs}{Notulentemplate in Overleaf zetten.}
+		\actionitem{N+34.7.2}{8-4-2021}{\rink}{Mensen die reismokken nog niet hebben opgehaald een uiterlijke datum meegeven voor wanneer ze de mokken moeten ophalen.}
+		\actionitem{N+34.7.3}{8-4-2021}{\ava}{Mailen hoe het design voor de de statafelhoes er moet uitzien (incl. foto en plaatje).}
+		\actionitem{N+34.7.4}{8-4-2021}{\nicky}{Design voor kaartjes bij relatiegeschenk doorsturen naar Jealy.}
+		\actionitem{N+34.7.5}{8-4-2021}{\ava}{Website updaten voor relatiegeschenken met kaartjes en design chocoladerepen.}
+		\actionitem{N+34.9.1}{8-4-2021}{\sanne}{Inschrijflijst voor secretarismeeting maken.}
+		\actionitem{N+34.9.2}{8-4-2021}{\sanne}{Nieuwsbriefstukje voor secretarismeeting schrijven.}
+		\actionitem{N+34.9.3}{8-4-2021}{\sanne}{Mailen naar geïnteresseerden voor secretarismeeting.}
+	\end{actionlist}
+	\mail
+	\point{Secretarismeeting}
+	\point{De toekomst van Stijl}
+	\point{Voortgang taken}	
+	\subPoint{Feedback Agenda}
+	\subPoint{Notulen}
+	\subPoint{Reismokken}
+	\subPoint{GEWIS-Promotie}
+	\subPoint{Relatiegeschenken - kaartjes}
+	\subPoint{Facturen}
+	\subPoint{Documentatie + Website}
+	\subPoint{Andere projecten + idee\"en}
+	\subSubPoint{Template voor officiële bestanden, relatiegeschenken, templatetemplate (tweetalendocument), GEWIS Icons}
+	\subSubPoint{'Speelse' GEWIS stijl}
+	\point{Website CBC}
+	\point{Aankomende evenementen}
+	\subPoint{Vergadering - 29 april}
+	\ad{We zullen in Q4 om de week op donderdagen in de pauze vergaderen}
+	\subPoint{Werkmoment - 28 April}
+	\AOB
+	\finalInquiry	
+	\closure
+\end{document}
