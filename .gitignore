@@ -1,6 +1,13 @@
 texroot/biber/
-texroot/dvips/
 texroot/fontconfig/
 texroot/miktex/
 texroot/tex/generic/config/
 texroot/tex/plain/config/
+
+compiletests/*.aux
+compiletests/*.bbl
+compiletests/*.blg
+compiletests/*.log
+compiletests/*.out
+compiletests/*.pdf
+compiletests/actionlist.tex

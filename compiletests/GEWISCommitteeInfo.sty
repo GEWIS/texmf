@@ -1,0 +1,48 @@
+%% GEWIS Committee Info Class for Agenda & Minutes
+%% Stijl - Gijs de Man, Rink Pieters
+%% Automatically generated on April 26, 2021 10:46:53
+%% Generated for use by Stijl. All organs are shown.
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{GEWISCommitteeInfo}[2021/04/26 GEWIS Committee Info Package]
+
+\usepackage{GEWISAgendaMinutes}
+
+\DeclareOption{gewis}{  %GEWIS
+    %% General information
+    \organName{Study Association GEWIS}  % (optional) Name of the organ the agenda is for
+}
+
+\DeclareOption{general}{ %General Meetings of Study Association GEWIS
+    %% General information
+    \organName{Study Association GEWIS}  % (optional) Name of the organ the agenda is for
+    \organAbr{general}
+    \newName{iedereen}{Iedereen}
+
+}
+
+%% Stijl
+\DeclareOption{stijl}{
+    %% General information
+    \organName{Commissie Stijl}
+    \organAbr{stijl}
+    \newName{st}{Stijl}
+    \newName{iedereen}{Iedereen}
+
+    %% Current members, ordered by install date
+    \newName{nicky}{Nicky~van~den~Berg} % Member since 2019/11/22
+    \newName{sanne}{Sanne~de~Wit} % Member since 2019/10/09
+    \newName{rink}{Rink~Pieters} % Member since 2019/09/25
+    \newName{gijs}{Gijs~de~Man} % Member since 2019/09/25
+    \newName{ava}{Ava~Swevels} % Member since 2018/05/15
+
+    %% Former members
+    \newName{illona}{Illona~Hoenderop} % Member between 2018/11/07 and 2020/12/10
+    \newName{vincent}{Vincent~Keltjens} % Member between 2016/09/15 and 2018/10/31
+    \newName{stephan}{Stephan~van~den~Berkmortel} % Member between 2016/09/15 and 2019/10/30
+    \newName{rik}{Rik~Rutjens} % Member between 2016/09/06 and 2016/10/25
+    \newName{maurice}{Maurice~Knoop} % Member between 2016/09/06 and 2019/03/11
+    \newName{bor}{Bor~de~Kock} % Member between 2016/09/06 and 2019/11/22
+}
+
+\ProcessOptions\relax

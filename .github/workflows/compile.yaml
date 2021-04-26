@@ -2,7 +2,7 @@ name: Compile LaTeX
 on: [push, pull_request]
 
 jobs:
-  GEWISDocument:
+  testrun:
     runs-on: ubuntu-20.04
     timeout-minutes: 25
 
@@ -22,7 +22,7 @@ jobs:
           cache-v3
         
     - name: Install MikTeX using apt-get
-      if: steps.cache-latex.outputs.cache-hit != 'true'
+      #if: steps.cache-latex.outputs.cache-hit != 'true'
       env:
         CACHE_HIT: ${{steps.cache-latex.outputs.cache-hit}}
         PACKAGES: "miktex latexmk"
@@ -35,17 +35,17 @@ jobs:
         mkdir -p ~/latex-cache
         sudo dpkg -L $PACKAGES | while IFS= read -r f; do if test -f $f; then echo $f; fi; done | xargs cp --parents --target-directory ~/latex-cache/
         
-    - name: Install MikTeX from cache
-      if: steps.cache-latex.outputs.cache-hit == 'true'
-      env:
-        CACHE_HIT: ${{steps.cache-latex.outputs.cache-hit}}
-        PACKAGES: "miktex"
-      run: |
-        if [[ "$CACHE_HIT" == 'true' ]]; then
-          sudo cp --verbose --force --recursive ~/latex-cache/* /
-        else
-          echo "This step should have been skipped"
-        fi
+    #- name: Install MikTeX from cache
+    #  if: steps.cache-latex.outputs.cache-hit == 'true'
+    #  env:
+    #    CACHE_HIT: ${{steps.cache-latex.outputs.cache-hit}}
+    #    PACKAGES: "miktex"
+    #  run: |
+    #    if [[ "$CACHE_HIT" == 'true' ]]; then
+    #      sudo cp --verbose --force --recursive ~/latex-cache/* /
+    #    else
+    #      echo "This step should have been skipped"
+    #    fi
         
     #- name: Setup SSH Keys and known_hosts
     #  env:
@@ -87,18 +87,29 @@ jobs:
     - name: Compile test GEWISDocument using PdfLaTeX (automatically determine number of runs)
       run: |
         cd compiletests
-        latexmk GEWISDocument -bibtex -pdf -pdflatex="~/bin/miktex-pdflatex --interaction=nonstopmode --synctex=0 %O %S" -time
+        latexmk GEWISDocument-test0 -bibtex -pdf -pdflatex="~/bin/miktex-pdflatex --interaction=nonstopmode --synctex=0 %O %S" -time
     
-    - name: Compile test GEWISDocument using PdfLaTeX (automatically determine number of runs)
+    - name: Compile test GEWISAgenda using PdfLaTeX (automatically determine number of runs)
       run: |
-        latexmk GEWISDocument -bibtex -pdf -pdflatex="~/bin/miktex-pdflatex --interaction=nonstopmode --synctex=0 %O %S" -time
+        cd compiletests
+        latexmk GEWISAgenda-test0 -bibtex -pdf -pdflatex="~/bin/miktex-pdflatex --interaction=nonstopmode --synctex=0 %O %S" -time
     
-    - name: Store GEWISDocument.pdf
+    - name: Compile test GEWISMinutes using PdfLaTeX (automatically determine number of runs)
+      run: |
+        cd compiletests
+        latexmk GEWISMinutes-test0 -bibtex -pdf -pdflatex="~/bin/miktex-pdflatex --interaction=nonstopmode --synctex=0 %O %S" -time
+    
+    - name: Compile test GEWISLetter using PdfLaTeX (automatically determine number of runs)
+      run: |
+        cd compiletests
+        latexmk GEWISLetter-test0 -bibtex -pdf -pdflatex="~/bin/miktex-pdflatex --interaction=nonstopmode --synctex=0 %O %S" -time
+    
+    - name: Store generated pdfs
       uses: actions/upload-artifact@v2
       with:
-        name: GEWISDocument.pdf runs
+        name: Exported pdfs
         path: |
-          compiletests/GEWISDocument.pdf
+          compiletests/*.pdf
           
     - name: Export logs on failure
       if: failure()
