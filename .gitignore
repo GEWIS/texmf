@@ -1,5 +1,5 @@
 texroot/biber/
-texroot/fontconfig/
+texroot/fontconfig/config/
 texroot/miktex/
 texroot/tex/generic/config/
 texroot/tex/plain/config/

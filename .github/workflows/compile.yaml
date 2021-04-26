@@ -17,9 +17,9 @@ jobs:
         path: |
           ~/.miktex
           ~/latex-cache
-        key: cache-v3-${{secrets.LATEX_VERSION}}
+        key: cache-v4-${{secrets.LATEX_VERSION}}
         restore-keys: |
-          cache-v3
+          cache-v4
         
     - name: Install MikTeX using apt-get
       #if: steps.cache-latex.outputs.cache-hit != 'true'
