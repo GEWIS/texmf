@@ -84,11 +84,15 @@ jobs:
         mpm --upgrade --package-level=essential
         mpm --update
         mpm --update-db
-    - name: Compile test GEWISDocument using PdfLaTeX (3 runs)
+    - name: Compile test GEWISDocument using PdfLaTeX (automatically determine number of runs)
       run: |
         cd compiletests
-        latexmk GEWISDocument -bibtex -pdf -pdflatex="~/bin/miktex-pdflatex --interaction=nonstopmode --synctex=0 %O %S"
-        
+        latexmk GEWISDocument -bibtex -pdf -pdflatex="~/bin/miktex-pdflatex --interaction=nonstopmode --synctex=0 %O %S" -time
+    
+    - name: Compile test GEWISDocument using PdfLaTeX (automatically determine number of runs)
+      run: |
+        latexmk GEWISDocument -bibtex -pdf -pdflatex="~/bin/miktex-pdflatex --interaction=nonstopmode --synctex=0 %O %S" -time
+    
     - name: Store GEWISDocument.pdf
       uses: actions/upload-artifact@v2
       with:
