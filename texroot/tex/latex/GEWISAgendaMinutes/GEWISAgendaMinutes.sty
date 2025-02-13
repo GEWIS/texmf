@@ -1,5 +1,6 @@
-%% GEWIS Minutes and Agenda Tex style v1.0
+%% GEWIS Minutes and Agenda Tex style v1.1
 %% Stijl - Gijs de Man, Rink Pieters
+%% Minor textual changes made in 2025 by Jens Knapen
 
 \NeedsTeXFormat{LaTeX2e} 
 \ProvidesPackage{GEWISAgendaMinutes}[2021/04/15 GEWIS Agenda and Minutes Package]
@@ -47,7 +48,7 @@
 \newcommand\@languageAbsentNotice{Apologies\xspace}
 \newcommand\@languageAbsent{Absent\xspace}
 \newcommand\@languageGuest{Guests\xspace}
-\newcommand\@languageMinutetaker{minute\nobreakspace taker\xspace}
+\newcommand\@languageMinutetaker{minute\nobreakdash-taker\xspace}
 \newcommand\@languageChairman{chair\xspace}
 
 % For header of agenda
@@ -55,10 +56,10 @@
 \newcommand\@languageMeeting{meeting}
 \renewcommand\@languageAlt{\@languageMeeting}
 \iftoggle{CM}{
-	\renewcommand\@languageAlt{Chair's Meeting}
+	\renewcommand\@languageAlt{Chairs' Meeting}
 }\relax
 \iftoggle{BM}{
-	\renewcommand\@languageAlt{board meeting}
+	\renewcommand\@languageAlt{Board Meeting}
 }\relax
 \iftoggle{GMM}{
 	\renewcommand\@languageAlt{General Members Meeting}
@@ -217,7 +218,7 @@
 		\@meetingNumberLast{\thelastnm}
 		\else
 		% Throw error if not numeric
-		\PackageError{GEWISAgendaMinutes}{Meetingnumber not numeric. Use alternative command.}\relax
+		\PackageError{GEWISAgendaMinutes}{Meeting number not numeric. Use alternative command.}\relax
 		\fi
 	}{
 		% Set superscript manually
@@ -235,7 +236,7 @@
 			\@meetingNumberLast{#2}
 		\else
 			% Throw error if not numeric
-			\PackageError{GEWISAgendaMinutes}{Meetingnumber not numeric. Use alternative command.}\relax
+			\PackageError{GEWISAgendaMinutes}{Meeting number not numeric. Use alternative command.}\relax
 		\fi
 	}{
 		% Set superscript manually
@@ -315,7 +316,7 @@
 % Check if starred or not, column widths are variable
 \newcommand\present{\@ifstar{\@invited}{\@notinvited}}
 
-% Create invited in case you are not sure who are going to show up or not
+% Create invited in case you are not sure who will or will not show up
 \newcommand\@invited[1]{
 	\iftoggle{dutch}{\renewcommand\@languagePresent{Uitgenodigd\xspace}}{\renewcommand\@languagePresent{Invited\xspace}}
 	\settowidth{\presenceWidth}{\@languagePresent}
@@ -323,7 +324,7 @@
 
 }
 
-% Create list as normal, with present, absend and notice
+% Create list as normal, with present, absent and notice
 \newcommand\@notinvited[1]{
 	\iftoggle{dutch}{\renewcommand\@languagePresent{Aanwezig\xspace}}{\renewcommand\@languagePresent{Present\xspace}}
 	\settowidth{\tempPresWidth}{\@languagePresent}
@@ -378,7 +379,7 @@
 		\textbf{\@languagePresent} & \readlist*\nameslist{\names} \readlist*\takerslist{\minutetakers}
 		\setbool{mt}{false}
 		\DeclareTextFontCommand{\textbf}\relax
-		% Print print chairman (and possibly minute taker)
+		% Print print chair (and possibly minute-taker)
 		\foreachitem\name\in\nameslist[]{%
 			\stepcounter{namessize}%
 			\ifthenelse{\equal{\name}{\@@chairman}}{%
@@ -391,7 +392,7 @@
 			}\relax%
 		}%
 		\ifbool{cm}{\ifthenelse{\equal{\thenamessize}{-1}}{}{\ifthenelse{\equal{\thenamessize}{0}}{\ \&\ }{,\ }}}{\PackageWarning{GEWISAgendaMinutes}{Chair error: Cannot find chair in presencelist.}\relax}%
-		% Print minute takers
+		% Print minute-takers
 		\foreachitem\name\in\nameslist[]{%
 			\foreachitem\taker\in\takerslist[]{%
 				\ifthenelse{\equal{\name}{\taker} \AND \not\equal{\taker}{\@@chairman}}{%
@@ -401,7 +402,7 @@
 					\setbool{mt}{true}%
 				}\relax%
 		}}%
-		\ifbool{mt}{}{\PackageWarning{GEWISAgendaMinutes}{Minutetaker error: Cannot find minutetaker(s) in presencelist.}\relax}%
+		\ifbool{mt}{}{\PackageWarning{GEWISAgendaMinutes}{Minutetaker error: Cannot find minute-taker(s) in presencelist.}\relax}%
 		% Print all names in nameslist
 		\foreachitem\name\in\nameslist[]{%
 			\setbool{mt}{false}%
@@ -419,7 +420,7 @@
 				}%
 			}\relax
 		}
-		% Print all people absent with notice
+		% Print all absentees that did not give notice
 		\DeclareTextFontCommand{\textbf}{\bfseries}
 		\ifdefempty{\@@absent}{}{\\%
 			\setcounter{namessize}{-1}%
@@ -440,7 +441,7 @@
 			}%
 			\DeclareTextFontCommand{\textbf}{\bfseries}%
 		}
-		% Print all people absent with notice
+		% Print all absentees that gave notice
 		\ifdefempty{\@@absentnotice}{}{\\%
 			\setcounter{namessize}{-1}%
 			\readlist*\absentnoticelist{\namesabsentnotice}%remove whitespace

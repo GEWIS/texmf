@@ -1,5 +1,6 @@
-%% GEWIS Agenda Tex style v1.0
+%% GEWIS Agenda Tex style v1.1
 %% Stijl - Gijs de Man, Rink Pieters
+%% Minor textual changes made in 2025 by Jens Knapen
 
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesClass{GEWISAgenda}[2021/04/15 GEWIS Agenda Class]
@@ -176,7 +177,7 @@
 	}\relax
 	\iftoggle{GMM}{
 		\vspace{1em}
-		Until four days before the meeting new items may still be put forward. The meeting documents are available for inspection a week prior to the meeting. Please read these documents in advance carefully. Do not leave these documents unattended but rather destroy them.
+		Until four days before the meeting new items may still be put forward. The meeting documents are available for inspection a week prior to the meeting. Please read these documents carefully in advance. Please do not leave these documents unattended but rather destroy them.
 	}\relax
 	\iftoggle{hasActionpoint}{
 		\ifnum\value{page}=1\newpage\else\vspace{1em}\fi

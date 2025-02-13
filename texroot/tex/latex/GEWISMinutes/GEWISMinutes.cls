@@ -1,5 +1,6 @@
-%% GEWIS Minute Tex style v1.0
+%% GEWIS Minute Tex style v1.1
 %% Stijl - Gijs de Man, Rink Pieters
+%% Minor textual changes made in 2025 by Jens Knapen
 
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesClass{GEWISMinutes}[2021/04/16 GEWIS Minute Class]
@@ -30,7 +31,7 @@
 %%
 \newcommand\@languageDocument{Minutes of the\xspace}
 \newcommand\@languageActionPoint{Action point\xspace}
-\newcommand\@languageActionPointlist{List of actionpoints}
+\newcommand\@languageActionPointlist{List of action points}
 \newcommand\@languageDecision{Decision\xspace}
 \newcommand\@languageDecisionlist{List of decisions}
 \newcommand\@languageFor{for}
@@ -48,11 +49,11 @@
 \newcommand\@languageContinue{The meeting is continued at }
 
 % Decision related
-\newcommand\@languageApproveMinutes{The minutes of the \@@lastMeetingNumbersc\ are approved thanks to the minute-taker.}
+\newcommand\@languageApproveMinutes{The minutes of the \@@lastMeetingNumbersc\ are approved with thanks to the minute-taker.}
 \newcommand\@languageApproveMinutesDutch{De notulen van de \@@lastMeetingNumbersc\ vergadering worden goedgekeurd met dank aan de notulist.}
 
 % Action point related 
-\newcommand\@languageDiscuss{The actionpoints are discussed:}
+\newcommand\@languageDiscuss{The action points are discussed:}
 
 % Entering and leaving the meeting
 \newcommand\@languageEnters{enters}
@@ -62,12 +63,12 @@
 
 % Any other business
 \newcommand\@languageAOBrequests{requests}
-\newcommand\@languageAOBrequest{\@languageAOBrequests\ a point for the AOB: }
+\newcommand\@languageAOBrequest{\@languageAOBrequests\ a point for the A.O.B: }
 
 % Voting proposals
 \newcommand\@languageVoteProposal{Voting proposal}
-\newcommand\@languageVoteFollows{A voting follows and vote proposal}
-\newcommand\@languageVoteOverwhelmed{\@languageVoteAccepted an overwhelming majority}
+\newcommand\@languageVoteFollows{A voting follows and voting proposal}
+\newcommand\@languageVoteOverwhelmed{\@languageVoteAccepted~an overwhelming majority}
 \newcommand\@languageVote{vote}
 \newcommand\@languageVotes{votes}
 \newcommand\@languageVoteAccepted{is accepted with}
@@ -119,7 +120,7 @@
 	% Voting proposals
 	\renewcommand\@languageVoteProposal{Stemvoorstel}
 	\renewcommand\@languageVoteFollows{Een stemming volgt en stemvoorstel}
-	\renewcommand\@languageVoteOverwhelmed{\@languageVoteAccepted een overweldigende meerderheid}
+	\renewcommand\@languageVoteOverwhelmed{\@languageVoteAccepted~een overweldigende meerderheid}
 	\renewcommand\@languageVote{stem}
 	\renewcommand\@languageVotes{stemmen}
 	\renewcommand\@languageVoteAccepted{wordt geaccepteerd met}
@@ -590,13 +591,15 @@
 
 %%
 %% Commands only really interesting for the GMM
+%% Note that Jens Knapen (Secretary 2024-2025) changed verbs ending in -ize (i.e. authorize) to -ise to conform with British spelling norms. 
+%% This has been implemented here in February 2025, but can be changed according to the wishes of future members/secretaries
 %%
 
 %%
-%% Authorization
+%% Authorisation
 %%
 \newenvironment{authlist}{
-	Authorizations at the start of the GMM:
+	Authorisations at the start of the GMM:
 	\vspace{1em}
 	\begingroup
 	\setlength{\LTleft}{-20cm plus -1fill}
@@ -609,7 +612,7 @@
 	\endgroup
 }
 
-% Grant, to be used in authorization environment
+% Grant, to be used in authorisation environment
 \newif\ifinauth
 \newcommand{\authitem}[2]{%
 	\ifinauth
